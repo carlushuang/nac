@@ -1,2 +1,4 @@
-# nnac
-neural network acclerator framework
+# nac
+neural-network acclerator
+
+*under development*
