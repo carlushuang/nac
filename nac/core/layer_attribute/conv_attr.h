@@ -8,6 +8,7 @@ public:
     int kernel;
     int padding;
     int stride;
+    //int dilation;
 };
 
 #endif

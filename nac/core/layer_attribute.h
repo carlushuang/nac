@@ -10,4 +10,6 @@ class layer_attribute{
 
 }
 
+#include "layer_attribute/conv_attr.h"
+
 #endif

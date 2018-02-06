@@ -1,4 +1,4 @@
-#include <nac_op_registry.h>
+#include <op_registry.h>
 #include <unordered_map>
 #include <string>
 #include <unordered_set>
@@ -12,7 +12,6 @@ static std::unordered_set<std::string> op_list ({
 #include "supported_ops"
 #undef  OP(x)
 });
-
 
 int insert_registry_entry(op_registry* opr){
     std::string entry_name = opr->name();
@@ -35,6 +34,16 @@ op_registry * get_registry_entry(std::string entry_name){
 
 const std::unordered_set<std::string> & supported_op_names(){
     return op_list;
+}
+
+int release_unused_entry(std::string entry_keep, int data_type_keep){
+    for(auto & it : regi_entry_map){
+        if(it.first == entry_keep)
+            it.second->release_unused(entry_keep);  // keep one, release else
+        else
+            it.second->release_unused(-1);  // release all
+    }
+    op_list.clear();
 }
 
 class __default_op_entry{

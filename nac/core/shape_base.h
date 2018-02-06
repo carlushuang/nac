@@ -1,7 +1,7 @@
 #ifndef NAC_SHAPE_BASE_H
 #define NAC_SHAPE_BASE_H
 
-#include <nac_internal.h>
+#include <common.h>
 
 namespace nac{
 

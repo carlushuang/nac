@@ -36,8 +36,6 @@ public:
     inline int n() const {return dim(3);}
 };
 
-
 }
-
 
 #endif

@@ -1,7 +1,7 @@
 #ifndef NAC_OP_C_REGISTRY_H
 #define NAC_OP_C_REGISTRY_H
 
-#include <nac_op_registry.h>
+#include <op_registry.h>
 
 namespace nac{
 
