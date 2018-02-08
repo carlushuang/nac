@@ -4,20 +4,20 @@
 #include "context.h"
 #include "operator_base.h"
 #include "observable.h"
-#include "layer_attribute.h"
+#include "hyperparameter.h"
 #include "tensor.h"
 
 namespace nac{
 
 class layer : public observable{
 public:
-    virtual int load_attribute(layer_attribute *);
+    virtual int load_attribute(hyperparameter *);
     virtual int load_weight(void *);
 
 protected:
     context             * ctx;
     operator_base       * op;
-    layer_attribute     * attr;
+    hyperparameter      * hparam;
 
     // weight tensor
     tensor             ** weights;

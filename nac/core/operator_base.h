@@ -4,14 +4,22 @@
 #include "layer.h"
 #include "tensor.h"
 #include "context.h"
-#include "layer_attribute.h"
+#include "hyperparameter.h"
 #include <string>
+#include <atomic>
 
 namespace nac{
 
 class operator_base {
 public:
-    operator_base(const char * op_name) : op_name_(op_name){}
+    operator_base(const char * op_name) : op_name_(op_name), ref_cnt(0) {
+        workspace=nullptr;
+        workspace_bytes = 0;
+    }
+    ~operator_base(){
+        if(workspace)
+            delete [] workspace;
+    }
     virtual int forward(const tensor ** inputs, tensor * output) = 0;
 
 protected:
@@ -24,16 +32,41 @@ protected:
     virtual int get_num_inputs()  const final{
         return layer_->num_inputs;
     }
-    virtual const layer_attribute * get_attr()  const final{
-        return layer_->attr;
+    virtual const hyperparameter * get_hparam()  const final{
+        return layer_->hparam;
     }
     virtual const context * get_context() const final{
         return layer_->ctx;
     }
 
+    virtual void *  request_workspace(int bytes) final {
+        if(!workspace){
+            workspace = new unsigned char [bytes];
+            workspace_bytes = bytes;
+        }
+        else{
+            if(bytes>workspace_bytes){
+                delete [] workspace;
+                workspace = new unsigned char [bytes];
+                workspace_bytes = bytes;
+            }
+        }
+        return static_cast<void*>(workspace);
+    }
+    virtual void clear_worksapce() final{
+        if(workspace){
+            delete [] workspace;
+            workspace_bytes = 0;
+        }
+    }
+
 private:
-    layer * layer_;
-    std::string op_name_;
+    layer              * layer_;
+    std::string          op_name_;
+
+    unsigned char *     workspace;
+    int                 workspace_bytes;
+    std::atomic_uint    ref_cnt;
 };
 
 }

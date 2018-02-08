@@ -1,6 +1,7 @@
 #ifndef NAC_UTILS_H
 #define NAC_UTILS_H
 
+#include "common.h"
 
 namespace nac{
 namespace utils{
@@ -52,13 +53,17 @@ inline int im2col_cpu_outsize(int channels,  int height,  int width, int ksize, 
     return height_col*width_col*channels_col;
 }
 
-void gemm_cpu(int ta, int tb, int m, int n, int k, float alpha, 
+void gemm_cpu(int ta, int tb,
+        int m, int n, int k, float alpha, 
         float *a, int lda, 
         float *b, int ldb,
-        float beta,
         float *c, int ldc);
 
 }
+
+void activate_cpu(float * d, int num, activation_type act_type);
+void activate_cpu(float * din, float * dout, int num, activation_type act_type);
+
 }
 
 

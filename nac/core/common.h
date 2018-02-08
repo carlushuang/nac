@@ -32,6 +32,11 @@ inline std::string make_string(const char* c_str) {
   return std::string(c_str);
 }
 
+
+enum class activation_type{
+    LOGISTIC, RELU, RELIE, LINEAR, RAMP, TANH, PLSE, LEAKY, ELU, LOGGY, STAIR, HARDTAN, LHTAN
+};
+
 }
 
 #ifdef NDEBUG
@@ -64,6 +69,20 @@ inline std::string make_string(const char* c_str) {
 
 #define NAC_CONCAT__(a,b)   a ## b
 #define NAC_CONCAT(a,b)     NAC_CONCAT__(a,b)
+
+
+#define NAC_RW_ATTR(type, name) \
+    private: \
+        type name##_; \
+    public:\
+        inline type & name () {return this->name##_;} \
+        inline type name () const {return this->name##_;}
+
+#define NAC_R_ATTR(type, name) \
+    private: \
+        type name##_; \
+    public:\
+        inline type name () const {return this->name##_;}
 
 
 #endif
