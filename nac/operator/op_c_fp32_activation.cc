@@ -15,6 +15,7 @@ public:
 
     virtual int forward(const tensor ** inputs, tensor * output)
     {
+        // point wise activation
         const activation_hparam * hparam = static_cast<const activation_attr*>(get_hparam());
         activate_cpu((float*) input->data(), (float*) output->data(), output->size(), hparam->act_type());
     }

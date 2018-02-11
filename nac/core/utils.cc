@@ -1,6 +1,7 @@
 #include "utils.h"
 
 #include <math.h>
+#include <float.h>
 
 namespace nac{
 namespace utils{
@@ -95,8 +96,6 @@ void gemm_cpu(int ta, int tb,
 
 }
 
-
-
 static inline float stair_activate(float x)
 {
     int n = floor(x);
@@ -174,6 +173,39 @@ void activate_cpu(float * din, float * dout, int num, activation_type act_type){
     int i;
     for(i = 0; i < num; ++i){
         dout[i] = do_activate(din[i], act_type);
+    }
+}
+
+void softmax(float *input, int n, float temp, int stride, float *output)
+{
+    int i;
+    float sum = 0;
+    float largest = -FLT_MAX;
+    for(i = 0; i < n; ++i){
+        if(input[i*stride] > largest) largest = input[i*stride];
+    }
+    for(i = 0; i < n; ++i){
+        float e = exp(input[i*stride]/temp - largest/temp);
+        sum += e;
+        output[i*stride] = e;
+    }
+    for(i = 0; i < n; ++i){
+        output[i*stride] /= sum;
+    }
+}
+
+/*
+ * region layer using softmax in darknet is very cache un-friendly
+ * we may consider ignore stride/group in the future.
+ */
+
+void softmax_cpu(float *input, int n, int batch, int batch_offset, int groups, int group_offset, int stride, float temp, float *output)
+{
+    int g, b;
+    for(b = 0; b < batch; ++b){
+        for(g = 0; g < groups; ++g){
+            softmax(input + b*batch_offset + g*group_offset, n, temp, stride, output + b*batch_offset + g*group_offset);
+        }
     }
 }
 

@@ -14,7 +14,7 @@
 
 #define NAC_OP_REGISTRY_DEFINE(entry_name)  \
     NAC_LOCAL op_registry * get_registry_##entry_name(){ \
-        static  op_registry  registry_##entry_name(entry_name);   \
+        static  op_registry  registry_##entry_name(#entry_name);   \
         return &registry_##entry_name; \
     }
 
@@ -126,8 +126,8 @@ private:
 // helper class to register op
 class op_register{
 public:
-    op_register(op_registry * oe, int data_type, std::string op_name, operator_base * op){
-        oe->register_op(data_type, op_name, op);
+    op_register(op_registry * opr, int data_type, std::string op_name, operator_base * op){
+        opr->register_op(data_type, op_name, op);
     }
     ~op_register(){}
 private:

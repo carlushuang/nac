@@ -1,3 +1,5 @@
 OP(conv)
 OP(fc)
 OP(activation)
+OP(softmax)
+OP(maxpool)

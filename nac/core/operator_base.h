@@ -10,6 +10,8 @@
 
 namespace nac{
 
+using _nac_operator = class operator_base;
+
 class operator_base {
 public:
     operator_base(const char * op_name) : op_name_(op_name), ref_cnt(0) {
@@ -36,6 +38,9 @@ protected:
         return layer_->hparam;
     }
     virtual const context * get_context() const final{
+        return layer_->ctx;
+    }
+    virtual context * get_context() final{
         return layer_->ctx;
     }
 

@@ -21,7 +21,7 @@ dtype im2col_get_pixel(dtype *im, int height, int width, int channels,
 template<typename dtype>
 void im2col_cpu(dtype* data_im,
     int channels,  int height,  int width,
-    int ksize,  int stride, int pad, dtype* data_col) 
+    int ksize,  int stride, int pad, dtype* data_col)
 {
     int c,h,w;
     int height_col = (height + 2*pad - ksize) / stride + 1;
@@ -63,6 +63,7 @@ void gemm_cpu(int ta, int tb,
 
 void activate_cpu(float * d, int num, activation_type act_type);
 void activate_cpu(float * din, float * dout, int num, activation_type act_type);
+void softmax_cpu(float *input, int n, int batch, int batch_offset, int groups, int group_offset, int stride, float temp, float *output);
 
 }
 

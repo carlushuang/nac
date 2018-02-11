@@ -9,6 +9,8 @@
 
 namespace nac{
 
+using _nac_layer = class layer;
+
 class layer : public observable{
 public:
     virtual int load_attribute(hyperparameter *);
