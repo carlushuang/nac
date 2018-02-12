@@ -5,6 +5,8 @@
 
 namespace nac{
 
+using _nac_tensor = class tensor;
+
 class tensor{
 public:
     tensor(int _w, int _h, int _c, int _n, void * _ptr) : w_(_w), h_(_h), c_(_c), n_(n_), data_(_ptr) {}

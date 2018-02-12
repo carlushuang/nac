@@ -12,19 +12,15 @@ using _nac_context = class context;
 class context{
 public:
     //static context * get_context();
-    context();
+    context(compute_device * _dev);
     ~context();
 
+    inline compute_device * & device() {return dev_;}
+    inline const ompute_device * & device() const {return dev_;}
+
 private:
-    
+    compute_device * dev_;
 
-    void init_once();
-
-    void probe_compute_device();
-
-
-    static std::mutex dev_lock;
-    static std::vector<unique_ptr<compute_device>> dev_list;
 };
 
 }

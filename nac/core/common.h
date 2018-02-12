@@ -4,6 +4,12 @@
 #include <sstream>
 #include <string>
 
+
+#define NAC_DATA_FP32   0x0
+#define NAC_DATA_FP16   0x1
+#define NAC_DATA_MAX    4
+
+
 namespace nac{
 
 inline void make_string_variadic(std::stringstream& /*ss*/) { /*terminate ver*/}
@@ -32,10 +38,35 @@ inline std::string make_string(const char* c_str) {
   return std::string(c_str);
 }
 
-
 enum class activation_type{
     LOGISTIC, RELU, RELIE, LINEAR, RAMP, TANH, PLSE, LEAKY, ELU, LOGGY, STAIR, HARDTAN, LHTAN
 };
+
+
+//#define NAC_OP_NAME(entry_name, data_type, op_name)  \
+//        #entry_name "-" #data_type "-"  #op_name 
+inline std::string nac_op_name(std::string entry_name, std::string data_type, std::string bare_op_name){
+    return entry_name+"-"+data_type+"-"+bare_op_name;
+}
+
+inline char * data_type_to_str(int data_type){
+
+    if(data_type == NAC_DATA_FP32)
+        return "fp32";
+    if(data_type == NAC_DATA_FP16)
+        return "fp16";
+
+    return "none";
+}
+inline int str_to_data_type(const char * str){
+    std::string s(std);
+    if(s == "fp32")
+        return NAC_DATA_FP32;
+    if(s == "fp16")
+        return NAC_DATA_FP16;
+
+    return NAC_DATA_MAX;
+}
 
 }
 

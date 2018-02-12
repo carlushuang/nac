@@ -18,13 +18,16 @@ context * context::get_context(){
     return &INSTANCE;
 }
 
-context::context(){
+context::context(compute_device * _dev){
+#if 0
     static  std::once_flag  _init_flag;
     try{
         std::call_once(_init_flag, init_once);
     }catch(...){
 
     }
+#endif
+    dev_ = _dev;
 }
 context::~context(){
 
