@@ -97,7 +97,7 @@ NAC_EXPORT nac_status nac_release_tensor(nac_tensor tensor, void *release_data_f
     return NAC_SUCCESS;
 }
 
-NAC_EXPORT nac_status nac_assign_tensor_data(nac_tensor tensor, void * data){
+NAC_EXPORT nac_status nac_set_tensor_data(nac_tensor tensor, void * data){
     if(!tensor)
         return NAC_INVALID_ARG;
     tensor->data() = data;
@@ -112,4 +112,11 @@ NAC_EXPORT nac_status nac_get_tensor_info(nac_tensor tensor, nac_tensor_info * i
     info->n = tensor->n();
     infor->data = tensor->data();
     return NAC_SUCCESS; 
+}
+
+NAC_EXPORT nac_layer nac_get_layer(nac_context context, const char * layer_name){
+    if(!context || !layer_name)
+        return NAC_INVALID_ARG;
+    
+    
 }
