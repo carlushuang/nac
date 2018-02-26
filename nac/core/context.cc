@@ -3,22 +3,8 @@
 
 namespace nac{
 
-//context context::INSTANCE;
 
-std::mutex  context::dev_lock;
-std::vector<unique_ptr<compute_device>>  context::dev_list;
-
-context * context::get_context(){
-    static  std::once_flag  _init_flag;
-    try{
-        std::call_once(_init_flag, init_once);
-    }catch(...){
-
-    }
-    return &INSTANCE;
-}
-
-context::context(compute_device * _dev){
+context::context(compute_device ** _devs, int _num_devs){
 #if 0
     static  std::once_flag  _init_flag;
     try{
@@ -27,26 +13,16 @@ context::context(compute_device * _dev){
 
     }
 #endif
-    dev_ = _dev;
+    if(!_devs || _num_devs==0){
+        NAC_WARNING("no device specified while creating context!");
+        return;
+    }
+    for(int i=0;i<_num_devs;i++){
+        devices().push_back(_devs[i]);
+    }
 }
 context::~context(){
 
-}
-
-void context::init_once(){
-
-}
-
-// only do once
-void context::probe_compute_device(){
-    dev_lock.lock();
-
-    op_registry * default_c_op_regi = get_registry_entry("c");
-    dev_list.emplace_back(new compute_device(default_c_op_regi));
-
-    // TODO: dlopen to get dev from shlib
-
-    dev_lock.unlock();
 }
 
 }

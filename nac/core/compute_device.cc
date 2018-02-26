@@ -18,8 +18,6 @@ static inline void init_probe_devices(){
     g_dev_list.emplace_back(default_c_device);
 
     // TODO: dlopen to get dev from shlib
-
-
     for(auto & ptr : g_dev_list){
         g_dev_ptr_list.push_back(ptr.get());
     }

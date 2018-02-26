@@ -6,6 +6,7 @@
 #include "observable.h"
 #include "hyperparameter.h"
 #include "tensor.h"
+#include <string>
 
 namespace nac{
 
@@ -15,6 +16,20 @@ class layer : public observable{
 public:
     virtual int load_attribute(hyperparameter *);
     virtual int load_weight(void *);
+    layer(context * _ctx):ctx(_ctx),op(nullptr),hparam(nullptr),weights(nullptr),
+                    num_weights(0),inputs(nullptr),num_inputs(0),output(nullptr)
+        {}
+    ~layer(){
+    }
+
+    int forward(const tensor ** inputs, tensor * output){
+        op->working_layer() = this;
+        op->forward(inputs, output);
+    }
+
+    void attach_op(operator_base*  _op){
+        op = _op;
+    }
 
 protected:
     context             * ctx;

@@ -11,30 +11,75 @@ using _nac_device = class compute_device;
 
 class compute_device{
 public:
-    compute_device(op_registry * _op_registed, const char * dev_name = nullptr){
-        op_registed_ = _op_registed;
+    compute_device(op_registry * _op_entries, const char * dev_name = nullptr){
+        op_entries() = _op_entries;
+        op_entries()->assign_working_device(this);
         if(dev_name)
-            name_ = dev_name;
+            name() = dev_name;
         else
-            name_ = _op_registed->name();
+            name() = _op_entries->name();
+
+        workspace_allocator = nullptr;
+        workspace_deleter = nullptr;
+    }
+    ~compute_device(){
+        clear_workspace();
     }
 
-    inline const std::string & name() const{
-        return name_;
-    }
-
-    inline op_registry * & op_registed() {return op_registed_;}
-    inline const op_registry * & op_registed() const {return op_registed_;}
     int select_op_entry(const char * entry_name);
     inline const std::string & current_entry_name()const {return current_entry_name_;}
 
     void init(){}
-private:
-    op_registry *    op_registed_;
-    std::string      name_;
 
+    void assign_workspace_allocator(void * (*allocator)(int ), void (*deleter)(void *)){
+        workspace_allocator = allocator;
+        workspace_deleter = deleter;
+    }
+
+    virtual void *  request_workspace(int bytes) final {
+        if(workspace_allocator){
+            workspace_ptr = workspace_allocator(bytes);
+            workspace_bytes = bytes;
+            return workspace_ptr;
+        }
+        // default cpu based allocator
+        if(!workspace_ptr){
+            workspace_ptr = static_cast<void*>(new unsigned char [bytes]);
+            workspace_bytes = bytes;
+        }
+        else{
+            if(bytes>workspace_bytes){
+                delete [] ((unsigned char *)workspace_ptr);
+                workspace_ptr = static_cast<void*>(new unsigned char [bytes]);
+                workspace_bytes = bytes;
+            }
+        }
+        return workspace_ptr;
+    }
+    virtual void clear_workspace() final{
+        if(workspace_deleter){
+            workspace_deleter(workspace_ptr);
+            return;
+        }
+        // default cpu based deleter
+        if(workspace_ptr){
+            delete [] workspace_ptr;
+            workspace_bytes = 0;
+        }
+    }
+
+private:
     std::string                   current_entry_name_;
     std::vector<operator_base *>  current_ops_;
+
+    void              * workspace_ptr;
+    int                 workspace_bytes;
+
+    void * (*workspace_allocator)(int _bytes);
+    void (*workspace_deleter)(void * _ptr);
+
+NAC_RW_ATTR(op_registry *, op_entries)
+NAC_R_ATTR(std::string, name)
 };
 
 

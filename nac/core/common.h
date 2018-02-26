@@ -97,6 +97,12 @@ inline int str_to_data_type(const char * str){
             <<"\n  \""<<nac::make_string(__VA_ARGS__)<<"\""<<  std::endl; \
     }while(0)
 
+#define NAC_ERROR(...) \
+    do{\
+        std::cerr<<"[nac] error in "<<__FILE__<<", line:"<<__LINE__ \
+            <<"\n  \""<<nac::make_string(__VA_ARGS__)<<"\""<<  std::endl; \
+    }while(0)
+
 
 #define NAC_CONCAT__(a,b)   a ## b
 #define NAC_CONCAT(a,b)     NAC_CONCAT__(a,b)

@@ -33,24 +33,36 @@
 
 
 namespace nac{
+/*
+ * device(class op_registry)
+ *   |- entry/data_type 1 -> ops(conv/maxpool/...)
+ *   |- entry/data_type 2 -> ops
+ *   |- ...
+ */
 
 class op_registry{
 public:
     typedef std::unordered_map<std::string, std::unique_ptr<operator_base>> op_map_type;
     typedef std::pair<int, op_map_type> data_entry_type;
 
-    op_registry(const char * name){entry_name = name;}
+    op_registry(const char * _name){name()=_name;}
     ~op_registry(){
         for(char * en : op_entry_names_)
             delete [] en;
     }
 
-    inline void register_op(int data_type, std::string op_name, operator_base * op){
+    inline int register_op(const char * entry_name, std::string op_name, operator_base * op){
+        int data_type = str_to_data_type(entry_name);
+        if(data_type == NAC_DATA_MAX)
+            return NAC_INVALID_OP_ENTRY_NAME;
+        return register_op(data_type, op_name, op);
+    }
+    inline int register_op(int data_type, std::string op_name, operator_base * op){
         int i;
         bool found_entry = false;
         if(data_type >= NAC_DATA_MAX){
             NAC_WARNING("try to insert data type ", data_type," exceed max ", NAC_DATA_MAX);
-            return;
+            return NAC_INVALID_OP_ENTRY_NAME;
         }
         for(i=0;i<op_maps.size();i++){
             auto & en = op_maps[i];
@@ -67,6 +79,8 @@ public:
             op_entry_names_.push_back(en);
             op_maps.push_back(std::make_pair(data_type, op_map_type()));
             i = op_maps.size()-1;
+            // make entry default when we add a new one
+            default_entry() = data_type_to_str(data_type);
         }
 
         op_map_type & op_map = op_maps[i].second;
@@ -79,6 +93,11 @@ public:
         }
         std::unique_ptr<operator_base> new_op(op);
         op_map[op_name] = std::move(new_op);
+        return 0;
+    }
+    inline op_map_type * get_ops(){
+        int data_type = str_to_data_type(default_entry());
+        return get_ops(data_type);
     }
     inline op_map_type * get_ops(const char * entry_name){
         int data_type = str_to_data_type(entry_name);
@@ -94,7 +113,13 @@ public:
         }
         return nullptr;
     }
+    inline operator_base * get_op(const char * op_name){
+        int data_type = str_to_data_type(default_entry());
+        return get_op(data_type, op_name);
+    }
     inline operator_base * get_op(const char * entry_name, const char * op_name){
+        if(!entry_name)
+            return get_op(op_name);
         int data_type = str_to_data_type(entry_name);
         return get_op(data_type, op_name);
     }
@@ -110,7 +135,6 @@ public:
         return found.get();
     }
 
-    inline const std::string & name() const{ return entry_name;}
 #if 0
     inline void release_unused(int data_type_keep){
         // release everything except the needed one, or all.
@@ -136,14 +160,25 @@ public:
         return op_maps.size();
     }
 
+    inline void assign_working_device(compute_device * dev){
+        for(int i=0;i<op_maps.size();i++){
+            for(auto & kv : op_maps[i].second){
+                auto & op_ptr = kv.second;          // unique_ptr<>
+                op_ptr->working_device() = dev;
+            }
+        }
+    }
+
 private:
-    std::string entry_name;
     op_registry(const op_registry&) = delete;
     op_registry& operator=(const op_registry&) = delete;
 
     //std::unordered_map<std::string, std::unique_ptr<operator_base>>  op_map;
     std::vector<data_entry_type>    op_maps;
     std::vector<char *>        op_entry_names_;     // maybe data type as key.
+
+NAC_RW_ATTR(std::string, default_entry)
+NAC_R_ATTR(std::string, name)
 };
 
 // helper class to register op
@@ -164,6 +199,7 @@ private:
 int insert_registry_entry(op_registry* opr);
 op_registry * get_registry_entry(std::string entry_name);
 const std::unordered_set<std::string> & supported_op_names();
+bool check_op_supported(std::string op_name);
 
 int release_unused_entry(std::string entry_keep, int data_type_keep);
 }

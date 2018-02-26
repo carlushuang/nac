@@ -45,6 +45,12 @@ int release_unused_entry(std::string entry_keep, int data_type_keep){
     }
     op_list.clear();
 }
+bool check_op_supported(std::string op_name){
+    auto found = op_list.find(op_name);
+    if(found == op_list.end())
+        return false;
+    return true;
+}
 
 class __default_op_entry{
 public:

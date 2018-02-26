@@ -23,11 +23,13 @@ typedef int                     nac_status;
 /* Error */
 #define NAC_SUCCESS                          0
 #define NAC_DEVICE_NOT_FOUND                -1
+#define NAC_CONTEXT_CREATE_FAIL             -2
 
 #define NAC_INVALID_ARG                      -100
 #define NAC_INVALID_DEVICE                   -101
 #define NAC_INVALID_OP_ENTRY_NAME            -102
 #define NAC_INVALID_TENSOR                   -103
+#define NAC_INVALID_LAYER_NAME               -104
 
 struct nac_device_info{
     const char      *   dev_name;
@@ -40,11 +42,10 @@ struct nac_tensor_info{
     void * data;
 };
 
-
-NAC_EXPORT nac_status nac_get_devices(nac_device ** devices, int * num);
+NAC_EXPORT nac_status nac_get_devices(nac_device ** devices, int * num_devices);
 NAC_EXPORT nac_status nac_get_device_info(nac_device device, struct nac_device_info * info);
 
-NAC_EXPORT nac_status nac_create_context(nac_context * context, nac_device  device);
+NAC_EXPORT nac_context nac_create_context(nac_device *  devices, int num_device);
 NAC_EXPORT nac_status nac_release_context(nac_context  context);
 
 // select only one op_entry to be used in this context
@@ -54,8 +55,8 @@ NAC_EXPORT nac_operator nac_get_operator(nac_context context, const char * entry
 NAC_EXPORT nac_status nac_operator_forward(nac_operator op, 
     nac_tensor * inputs, int num_input, nac_tensor * outputs, int num_output);
 
-NAC_EXPORT nac_layer nac_get_layer(nac_context context, const char * layer_name);
-
+NAC_EXPORT nac_layer nac_create_layer(nac_context context, nac_device  device, const char * entry_name, const char * layer_name);
+NAC_EXPORT nac_status nac_release_layer(nac_layer layer);
 
 NAC_EXPORT nac_tensor nac_create_tensor(int w, int h, int c, int n);
 NAC_EXPORT nac_status nac_release_tensor(nac_tensor tensor, void *release_data_func(void*));
