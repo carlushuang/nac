@@ -4,7 +4,7 @@
 #include "network_attribute.h"
 #include "observable.h"
 #include "context.h"
-#include "layer.h"
+#include "node.h"
 #include <vector>
 
 namespace nac{
@@ -15,7 +15,7 @@ public:
 private:
     network_attribute * attr;
     context * ctx;
-    std::vector<layer*> layers;
+    std::vector<node*> layers;
 };
 
 }

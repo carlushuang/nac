@@ -13,7 +13,7 @@ namespace nac{
 
 typedef class _nac_context      * nac_context;
 typedef class _nac_operator     * nac_operator;
-typedef class _nac_layer        * nac_layer;
+typedef class _nac_node         * nac_node;
 typedef class _nac_device       * nac_device;
 typedef class _nac_tensor       * nac_tensor;
 
@@ -56,7 +56,7 @@ NAC_EXPORT nac_status nac_operator_forward(nac_operator op,
     nac_tensor * inputs, int num_input, nac_tensor * outputs, int num_output);
 
 NAC_EXPORT nac_layer nac_create_layer(nac_context context, nac_device  device, const char * entry_name, const char * layer_name);
-NAC_EXPORT nac_status nac_release_layer(nac_layer layer);
+NAC_EXPORT nac_status nac_release_layer(nac_layer node);
 
 NAC_EXPORT nac_tensor nac_create_tensor(int w, int h, int c, int n);
 NAC_EXPORT nac_status nac_release_tensor(nac_tensor tensor, void *release_data_func(void*));

@@ -195,7 +195,7 @@ void softmax(float *input, int n, float temp, int stride, float *output)
 }
 
 /*
- * region layer using softmax in darknet is very cache un-friendly
+ * region node using softmax in darknet is very cache un-friendly
  * we may consider ignore stride/group in the future.
  */
 

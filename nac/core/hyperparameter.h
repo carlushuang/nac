@@ -13,7 +13,7 @@ class hyperparameter{
 #include "hyperparameter/conv_hparam.h"
 #include "hyperparameter/activation_hparam.h"
 #include "hyperparameter/softmax_hparam.h"
-
+#include "hyperparameter/maxpool_hparam.h"
 }
 
 #endif

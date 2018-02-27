@@ -119,7 +119,7 @@ NAC_EXPORT nac_layer nac_create_layer(nac_context context, nac_device device, co
         return nullptr;
 
     if(!check_op_supported(layer_name)){
-        NAC_ERROR("desired layer:", layer_name, " is not supported");
+        NAC_ERROR("desired node:", layer_name, " is not supported");
         return nullptr;
     }
 
@@ -139,21 +139,21 @@ NAC_EXPORT nac_layer nac_create_layer(nac_context context, nac_device device, co
     op_registry * opr = device->op_entries();
     operator_base * op;
 
-    op = opr->get_op(entry_name, layer_name  /*layer name same as op name*/ );
+    op = opr->get_op(entry_name, layer_name  /*node name same as op name*/ );
     if(!op){
-        NAC_ERROR("count not find layer:", layer_name, " in device:", device->name());
+        NAC_ERROR("count not find node:", layer_name, " in device:", device->name());
         return nullptr;
     }
 
-    layer * l = new layer(context);
+    node * l = new node(context);
     l->attach_op(op);
 
     return l;
 }
 
-NAC_EXPORT nac_status nac_release_layer(nac_layer layer){
-    if(!layer)
+NAC_EXPORT nac_status nac_release_layer(nac_layer node){
+    if(!node)
         return NAC_INVALID_ARG;
-    delete layer;
+    delete node;
     return NAC_SUCCESS;
 }

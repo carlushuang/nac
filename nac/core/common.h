@@ -122,4 +122,9 @@ inline int str_to_data_type(const char * str){
         inline type name () const {return this->name##_;}
 
 
+#define DISABLE_COPY_AND_ASSIGN(classname)  \
+    private:   \
+        classname(const classname&) = delete;  \
+        classname& operator=(const classname&) = delete;
+
 #endif

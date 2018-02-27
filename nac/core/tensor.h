@@ -15,6 +15,14 @@ public:
     tensor() : tensor(0, 0, 0, 0){}
 
     inline bool empty() const {return data_==nullptr;}
+    inline void feed_data(int _w, int _h, int _c, int _n, void * _ptr){
+        NAC_ASSERT(_ptr, "data pointer must not be nullptr")
+        w() = _w;
+        h() = _h;
+        c() = _c;
+        n() = _n;
+        data() = _ptr;
+    }
 
     NAC_RW_ATTR(void *, data)
     NAC_RW_ATTR(int, w)

@@ -170,15 +170,13 @@ public:
     }
 
 private:
-    op_registry(const op_registry&) = delete;
-    op_registry& operator=(const op_registry&) = delete;
-
     //std::unordered_map<std::string, std::unique_ptr<operator_base>>  op_map;
     std::vector<data_entry_type>    op_maps;
     std::vector<char *>        op_entry_names_;     // maybe data type as key.
 
 NAC_RW_ATTR(std::string, default_entry)
 NAC_R_ATTR(std::string, name)
+DISABLE_COPY_AND_ASSIGN(op_registry)
 };
 
 // helper class to register op

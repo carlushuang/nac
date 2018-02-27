@@ -37,9 +37,9 @@ void prepare(){
 
 void test(){
     for(const std::string & test_op : g_test_ops){
-        nac_layer layer = nac_create_layer(g_context, g_device, nullptr, test_op.c_str());
-        if(!layer){
-            std::cout<< "fail to create layer "<<test_op <<std::endl;
+        nac_layer node = nac_create_layer(g_context, g_device, nullptr, test_op.c_str());
+        if(!node){
+            std::cout<< "fail to create node "<<test_op <<std::endl;
             std::terminate();
         }
 

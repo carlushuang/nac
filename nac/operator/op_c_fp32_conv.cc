@@ -12,41 +12,39 @@ public:
     void op_c_fp32_conv(const char * op_name) :  operator_base(op_name) {}
     ~op_c_fp32_conv () {}
 
-    virtual int forward(const tensor ** inputs, tensor * output)
+    virtual int forward()
     {
-        NAC_ASSERT_COND(inputs, "input tensor should not be NULL");
-        NAC_ASSERT_COND(output, "output tensor should not be NULL");
+        const conv_hparam * param = static_cast<const conv_attr*>(hparam());
+        const tensor * x = input(0);
+        const tensor * filter = weight(0);
+        tensor * out = output(0);
 
-        const conv_hparam * hparam = static_cast<const conv_attr*>(get_hparam());
-        // assume one input
-        const tensor * input = inputs[0];
-        const tensor * weight = get_weights()[0];
-        NAC_ASSERT_COND( (input->n() == hparam->batch()) && (output->n() == hparam->batch()), 
-            "input/output/op batch size not the same, ", 
-            input->n(),"/", output->n(), "/",hparam->batch(), " each");
-        NAC_ASSERT_COND( hparam->filters() == weight->n(),
-            "hparam filters not same as weight tensor", 
-            hparam->filters(), "/", weight->n()," each" );
+        NAC_ASSERT_COND( (x->n() == param->batch()) && (out->n() == param->batch()), 
+            "x/out/op batch size not the same, ", 
+            x->n(),"/", out->n(), "/",param->batch(), " each");
+        NAC_ASSERT_COND( param->filters() == filter->n(),
+            "param filters not same as filter tensor", 
+            param->filters(), "/", filter->n()," each" );
 
         float * col_ptr = (float*)request_workspace(sizeof(float) *
-            im2col_cpu_outsize(input->c(), input->h(), input->w(), hparam->kernel(), hparam->stride(), hparam->padding()));
+            im2col_cpu_outsize(x->c(), x->h(), x->w(), param->kernel(), param->stride(), param->padding()));
         int i;
 
-        int m = hparam->filters();
-        int k = hparam->kernel() * hparam->kernel() * input->c();
-        int n = output->w() * output->h();
-        for(i=0;i<hparam->batch();i++){
-            float *a = (float *) weight->data();
+        int m = param->filters();
+        int k = param->kernel() * param->kernel() * x->c();
+        int n = out->w() * out->h();
+        for(i=0;i<param->batch();i++){
+            float *a = (float *) filter->data();
             float *b = col_ptr;
-            float *c = (float * )output->data() + i*output->w()*output->h()*output->c();
+            float *c = (float * )out->data() + i*out->w()*out->h()*out->c();
 
-            im2col_cpu((float*)input->data()+i*input->w()*input->h()*input->c(),
-                input->c(), input->h(), input->w(), hparam->kernel(), hparam->stride(), hparam->padding(), b);
+            im2col_cpu((float*)x->data()+i*x->w()*x->h()*x->c(),
+                x->c(), x->h(), x->w(), param->kernel(), param->stride(), param->padding(), b);
             gemm_cpu(0,0,m,n,k,1,a,k,b,n,1,c,n);
         }
 
-        if(hparam->act_type() != activation_type::LINEAR)
-            activate_cpu(output->data(), output->size(), hparam->act_type());
+        if(param->act_type() != activation_type::LINEAR)
+            activate_cpu(out->data(), out->size(), param->act_type());
         
         return 0;
     }
