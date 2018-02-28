@@ -61,6 +61,9 @@ public:
         insert_registry_entry(NAC_GET_OP_REGISTRY(c));
     }
 };
+
+namespace {
 static __default_op_entry  default_op_entry;
+}
 
 }

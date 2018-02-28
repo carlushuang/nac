@@ -9,6 +9,10 @@ static std::vector<std::unique_ptr<compute_device>> g_dev_list;
 static std::vector<compute_device*> g_dev_ptr_list;   // only a pointer storage place
 static std::once_flag  g_init_flag;
 
+static inline void dynamic_load_devices(){
+    
+}
+
 static inline void init_probe_devices(){
     std::unique_lock<std::mutex> _lock(g_dev_lock);
 

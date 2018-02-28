@@ -1,5 +1,5 @@
 #include <nac.h>
-#include "context.h"
+#include "ctx.h"
 
 /* export api */
 
@@ -29,10 +29,10 @@ NAC_EXPORT nac_context nac_create_context(nac_device *  devices, int num_device)
     return ctx;
 }
 
-NAC_EXPORT nac_status nac_release_context(nac_context context){
-    if(!context)
+NAC_EXPORT nac_status nac_release_context(nac_context ctx){
+    if(!ctx)
         return NAC_INVALID_ARG;
-    delete context;
+    delete ctx;
     return NAC_SUCCESS;
 }
 
@@ -69,62 +69,25 @@ NAC_EXPORT nac_status nac_get_devices(nac_device ** devices, int * num_devices){
     return NAC_SUCCESS;
 }
 
-NAC_EXPORT nac_status nac_select_op_entry(nac_context  context, const char * entry_name){
-    if(!context || !entry_name)
+NAC_EXPORT nac_status nac_select_op_entry(nac_context  ctx, const char * entry_name){
+    if(!ctx || !entry_name)
         return NAC_INVALID_ARG;
-    int ret = context->device()->select_op_entry(entry_name);
+    int ret = ctx->device()->select_op_entry(entry_name);
     if(ret != 0)
         return NAC_INVALID_OP_ENTRY_NAME;
     return NAC_SUCCESS;
 }
 
-NAC_EXPORT nac_operator nac_get_operator(nac_context context, const char * entry_name, const char * op_name){
-    if(!context || !op_name || !entry_name)
-        return NAC_INVALID_ARG;
-    op_registry * opr = context->device()->op_entries();
-    return opr->get_op(entry_name, op_name);
-}
-
-NAC_EXPORT nac_tensor nac_create_tensor(int w, int h, int c, int n){
-    return new tensor(w,h,c,n);
-}
-NAC_EXPORT nac_status nac_release_tensor(nac_tensor tensor, void *release_data_func(void*)){
-    if(!tensor)
-        return NAC_INVALID_ARG;
-    if(release_data_func)
-        release_data_func(tensor->data());
-    delete tensor;
-    return NAC_SUCCESS;
-}
-
-NAC_EXPORT nac_status nac_set_tensor_data(nac_tensor tensor, void * data){
-    if(!tensor)
-        return NAC_INVALID_ARG;
-    tensor->data() = data;
-    return NAC_SUCCESS;
-}
-NAC_EXPORT nac_status nac_get_tensor_info(nac_tensor tensor, nac_tensor_info * info){
-    if(!tensor || !info)
-        return NAC_INVALID_ARG;
-    info->w = tensor->w();
-    info->h = tensor->h();
-    info->c = tensor->c();
-    info->n = tensor->n();
-    infor->data = tensor->data();
-    return NAC_SUCCESS;
-}
-
-NAC_EXPORT nac_layer nac_create_layer(nac_context context, nac_device device, const char * entry_name, const char * layer_name){
-    if(!context || !device || !layer_name)
+NAC_EXPORT nac_node nac_create_node(nac_context ctx, nac_device device, const char * entry_name, const char * op_name){
+    if(!ctx || ! device || !op_name)
         return nullptr;
-
-    if(!check_op_supported(layer_name)){
-        NAC_ERROR("desired node:", layer_name, " is not supported");
+    if(!check_op_supported(op_name)){
+        NAC_ERROR("desired op:", op_name, " is not supported");
         return nullptr;
     }
 
     bool found = false;
-    for(auto dev : context->devices()){
+    for(auto dev : ctx->devices()){
         if(dev == device){
             found = true;
             break;
@@ -145,7 +108,125 @@ NAC_EXPORT nac_layer nac_create_layer(nac_context context, nac_device device, co
         return nullptr;
     }
 
-    node * l = new node(context);
+    node * the_node = new node(ctx);
+    the_node->attach_op(op);
+
+    return the_node;
+}
+#if 0
+NAC_EXPORT nac_status nac_release_node(nac_node nd){
+    if(!nd)
+        return NAC_INVALID_ARG;
+    
+}
+#endif
+
+
+NAC_EXPORT nac_tensor nac_create_tensor(int w, int h, int c, int n, void (*delete_data_func)(void*)){
+    return new tensor(w,h,c,n,delete_data_func);
+}
+NAC_EXPORT nac_status nac_release_tensor(nac_tensor t){
+    if(!t)
+        return NAC_INVALID_ARG;
+
+    delete t;
+    return NAC_SUCCESS;
+}
+
+NAC_EXPORT nac_status nac_set_tensor_data(nac_tensor t, void * data){
+    if(!t)
+        return NAC_INVALID_ARG;
+    t->data() = data;
+    return NAC_SUCCESS;
+}
+NAC_EXPORT nac_status nac_get_tensor_info(nac_tensor t, nac_tensor_info * info){
+    if(!t || !info)
+        return NAC_INVALID_ARG;
+    info->w = t->w();
+    info->h = t->h();
+    info->c = t->c();
+    info->n = t->n();
+    info->data = t->data();
+    return NAC_SUCCESS;
+}
+
+NAC_EXPORT void * nac_get_tensor_data(nac_tensor t){
+    if(!t)
+        return nullptr;
+    return t->data();
+}
+
+NAC_EXPORT nac_graph nac_create_graph(nac_context ctx){
+    if(!ctx)
+        return nullptr;
+    nac_graph gr = new graph(ctx);
+    return gr;
+}
+NAC_EXPORT nac_status nac_graph_attach_node(nac_graph gr, nac_node * nodes, int num){
+    if(!gr || !nodes || num==0)
+        return NAC_INVALID_ARG;
+    gd->attach_nodes(nodes, num);
+    return NAC_SUCCESS;
+}
+NAC_EXPORT nac_status nac_graph_feed_input(nac_graph gr, nac_tensor * inputs, int num_inputs){
+    if(!gr || !nodes || num==0)
+        return NAC_INVALID_ARG;
+    gr->feed_inputs(inputs, num_inputs);
+    return NAC_SUCCESS;
+}
+NAC_EXPORT nac_status nac_graph_init(nac_graph){
+
+}
+NAC_EXPORT nac_status nac_graph_start_inference(nac_graph gr, int loop){
+    if(!gr || loop <= 0 )
+        return NAC_INVALID_ARG;
+
+    gr->inference_loop(loop);
+    return NAC_SUCCESS;
+}
+NAC_EXPORT nac_status nac_graph_start_inference_async(nac_graph gr, int loop){
+
+}
+NAC_EXPORT nac_status nac_graph_get_result(nac_graph gr, nac_tensor ** outs, int * num_outs, int need_block){
+
+}
+NAC_EXPORT nac_status nac_release_graph(nac_graph gr){
+
+}
+
+
+NAC_EXPORT nac_layer nac_create_layer(nac_context ctx, nac_device device, const char * entry_name, const char * layer_name){
+    if(!ctx || !device || !layer_name)
+        return nullptr;
+
+    if(!check_op_supported(layer_name)){
+        NAC_ERROR("desired node:", layer_name, " is not supported");
+        return nullptr;
+    }
+
+    bool found = false;
+    for(auto dev : ctx->devices()){
+        if(dev == device){
+            found = true;
+            break;
+        }
+    }
+
+    if(!found){
+        NAC_ERROR("count not find the device");
+        return nullptr;
+    }
+
+    op_registry * opr = device->op_entries();
+    operator_base * op;
+
+    op = opr->get_op(entry_name, layer_name  /*node name same as op name*/ );
+    if(!op){
+        NAC_ERROR("count not find node:", layer_name, " in device:", device->name());
+        return nullptr;
+    }
+
+    node * l = new node(ctx);
     l->attach_op(op);
 
     return l;
