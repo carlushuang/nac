@@ -18,11 +18,11 @@ public:
 
 protected:
     inline int dim(int i) const {
-        NAC_ASSERT_COND(i<DIM, "try to get dim:", i, " exceed total dim:", DIM);
+        NAC_ASSERT(i<DIM, "try to get dim:", i, " exceed total dim:", DIM);
         return dims[i];
     }
     inline int & dim(int i) {
-        NAC_ASSERT_COND(i<DIM, "try to get dim:", i, " exceed total dim:", DIM);
+        NAC_ASSERT(i<DIM, "try to get dim:", i, " exceed total dim:", DIM);
         return dims[i];
     }
 

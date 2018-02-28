@@ -5,6 +5,7 @@
 #include "context.h"
 #include "node.h"
 #include "tensor.h"
+#include "common.h"
 #include <vector>
 #include <memory>
 #include <thread>
@@ -19,7 +20,7 @@ public:
     graph(context * _ctx) :ctx(_ctx), execution_thread(nullptr), execution_need_exit(false),
         in_execution(false)
         {}
-    ~graph(){
+    virtual ~graph(){
         if(execution_thread){
             execution_need_exit = true;
             execution_thread->join();
@@ -80,7 +81,7 @@ public:
     }
     inline void feed_inputs(tensor ** t, int num){
         for(int i=0;i<num;i++){
-            inputs.emplace_back(n[i]);
+            inputs.emplace_back(t[i]);
         }
     }
     inline void feed_inputs(std::vector<tensor*> & t_vec){
@@ -88,7 +89,6 @@ public:
             inputs.emplace_back(t);
         }
     }
-
 
     inline void pool(){
         // block for execution finish
@@ -102,7 +102,7 @@ public:
             return nullptr;
         }
         NAC_ASSERT(idx<nodes.size(), "request idx:", idx, " is bigger than total nodes number", nodes.size());
-        return nodes.at(idx).get();
+        return nodes.at(idx)->output(idx);;
     }
 
 private:

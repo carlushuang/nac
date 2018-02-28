@@ -19,10 +19,10 @@ public:
         const tensor * filter = weight(0);
         tensor * out = output(0);
 
-        NAC_ASSERT_COND( (x->n() == param->batch()) && (out->n() == param->batch()), 
+        NAC_ASSERT( (x->n() == param->batch()) && (out->n() == param->batch()), 
             "x/out/op batch size not the same, ", 
             x->n(),"/", out->n(), "/",param->batch(), " each");
-        NAC_ASSERT_COND( param->filters() == filter->n(),
+        NAC_ASSERT( param->filters() == filter->n(),
             "param filters not same as filter tensor", 
             param->filters(), "/", filter->n()," each" );
 

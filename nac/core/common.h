@@ -1,9 +1,10 @@
-#ifndef NAC_INTERNAL_H
-#define NAC_INTERNAL_H
+#ifndef NAC_COMMON_H
+#define NAC_COMMON_H
 
 #include <sstream>
 #include <string>
-
+#include <exception>
+#include <iostream>
 
 #define NAC_DATA_FP32   0x0
 #define NAC_DATA_FP16   0x1
@@ -49,8 +50,7 @@ inline std::string nac_op_name(std::string entry_name, std::string data_type, st
     return entry_name+"-"+data_type+"-"+bare_op_name;
 }
 
-inline char * data_type_to_str(int data_type){
-
+inline const char * data_type_to_str(int data_type){
     if(data_type == NAC_DATA_FP32)
         return "fp32";
     if(data_type == NAC_DATA_FP16)
@@ -59,7 +59,7 @@ inline char * data_type_to_str(int data_type){
     return "none";
 }
 inline int str_to_data_type(const char * str){
-    std::string s(std);
+    std::string s(str);
     if(s == "fp32")
         return NAC_DATA_FP32;
     if(s == "fp16")
@@ -71,13 +71,9 @@ inline int str_to_data_type(const char * str){
 }
 
 #ifdef NDEBUG
-#undef NAC_ASSERT
-#endif
-
-#include <exception>
-#include <iostream>
-#ifdef NAC_ASSERT
-#define NAC_ASSERT_COND(cond, ... ) \
+#define NAC_ASSERT(cond, msg)
+#else
+#define NAC_ASSERT(cond, ... ) \
     do{ \
         if( !(cond)) { \
             std::cerr<<"[nac] terminate due to assert in "<<__FILE__<<", line:"<<__LINE__ \
@@ -86,9 +82,6 @@ inline int str_to_data_type(const char * str){
         }\
     } \
     while(0)
-
-#else
-#define NAC_ASSERT_COND(cond, msg)
 #endif
 
 #define NAC_WARNING(...) \

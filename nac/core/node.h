@@ -89,7 +89,7 @@ public:
     }
 
     // output, readonly
-    inline const tensor * output(int idx = 0) const {
+    inline tensor * output(int idx = 0) const {
         NAC_ASSERT(idx < outputs_.size(), "request output index:", idx, " bigger than size:", outputs_.size());
         return outputs_.at(idx).get();
     }

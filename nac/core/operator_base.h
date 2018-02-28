@@ -64,7 +64,7 @@ protected:
 
     virtual void *  request_workspace(int bytes) final {
         // make sure dev_ has been assigned
-        NAC_ASSERT_COND(dev_, "device has not been assigned to this op");
+        NAC_ASSERT(dev_, "device has not been assigned to this op");
         return dev_->request_workspace(bytes);
     }
 
