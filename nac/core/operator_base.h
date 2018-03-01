@@ -15,8 +15,6 @@ using _nac_operator = class operator_base;
 class operator_base {
 public:
     operator_base(const char * _name) : full_record_name(_name), ref_cnt(0) {
-        workspace=nullptr;
-        workspace_bytes = 0;
         layer_ = nullptr;
         dev_ = nullptr;
     }

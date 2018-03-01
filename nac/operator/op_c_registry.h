@@ -5,7 +5,7 @@
 
 namespace nac{
 
-NAC_OP_REGISTRY_DECLARE(c);
+NAC_OP_REGISTRY_DECLARE(c)
 
 
 }

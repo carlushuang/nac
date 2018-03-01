@@ -13,53 +13,65 @@
 #include <utility>
 #include <algorithm>
 
-#define NAC_OP_REGISTRY_DECLARE(entry_name) \
-    NAC_LOCAL op_registry * get_registry_##entry_name()
+#define NAC_OP_REGISTRY_DECLARE(registry_name) \
+    NAC_LOCAL op_registry * get_registry_##registry_name();
 
-#define NAC_OP_REGISTRY_DEFINE(entry_name)  \
-    NAC_LOCAL op_registry * get_registry_##entry_name(){ \
-        static  op_registry  registry_##entry_name(#entry_name);   \
-        return &registry_##entry_name; \
-    }
+#define NAC_OP_REGISTRY_DEFINE(registry_name)  \
+    NAC_LOCAL op_registry * get_registry_##registry_name(){ \
+        static  op_registry  _registry_##registry_name(#registry_name);   \
+        return &_registry_##registry_name; \
+    };
 
-#define NAC_OP_NAME(entry_name, data_type, op_name)  \
-        #entry_name "-" #data_type "-"  #op_name 
+#define NAC_OP_NAME(registry_name, data_type, op_name)  \
+        #registry_name "-" #data_type "-"  #op_name 
 
 
-#define NAC_OP_REGISTER(entry_name, data_type, op_name, op_class) \
+#define NAC_OP_REGISTER(registry_name, data_type, op_name, op_class) \
     namespace { \
-        static op_register NAC_CONCAT(_##entry_name, __LINE__) \
-            (get_registry_##entry_name(), data_type, op_name, \
-            new op_class( NAC_OP_NAME(entry_name, data_type, op_name) ) ) ; \
+        static op_register NAC_CONCAT(_##registry_name, __LINE__) \
+            (get_registry_##registry_name(), data_type, op_name, \
+            new op_class( NAC_OP_NAME(registry_name, data_type, op_name) ) ) ; \
     }
 
-#define NAC_GET_OP_REGISTRY(entry_name) get_registry_##entry_name()
+#define NAC_GET_OP_REGISTRY(registry_name) get_registry_##registry_name()
 
+#if 0
 // refer to data_mm class
-#define NAC_OP_DM_REGISTER_ALLOCATOR(entry_name, data_type, dm_allocator) \
+#define NAC_OP_REGISTER_DM_ALLOCATOR(registry_name, data_type, dm_allocator) \
     namespace { \
-        static op_dm_register_allocator NAC_CONCAT(_##entry_name, __LINE__) \
-            (NAC_GET_OP_REGISTRY(entry_name), data_type, dm_allocator) ; \
+        static op_dm_register_allocator NAC_CONCAT(_##registry_name, __LINE__) \
+            (NAC_GET_OP_REGISTRY(registry_name), data_type, dm_allocator) ; \
     }
 
-#define NAC_OP_DM_REGISTER_DELETER(entry_name, data_type, dm_deleter) \
+#define NAC_OP_REGISTER_DM_DELETER(registry_name, data_type, dm_deleter) \
     namespace { \
-        static op_dm_register_deleter NAC_CONCAT(_##entry_name, __LINE__) \
-            (NAC_GET_OP_REGISTRY(entry_name), data_type, dm_deleter) ; \
+        static op_dm_register_deleter NAC_CONCAT(_##registry_name, __LINE__) \
+            (NAC_GET_OP_REGISTRY(registry_name), data_type, dm_deleter) ; \
     }
 
-#define NAC_OP_DM_REGISTER_MEMCPY(entry_name, data_type, dm_memcpy_d2h, dm_memcpy_h2d, dm_memcpy_d2d) \
+#define NAC_OP_REGISTER_DM_MEMCPY(registry_name, data_type, dm_memcpy_d2h, dm_memcpy_h2d, dm_memcpy_d2d) \
     namespace { \
-        static op_dm_register_memcpy NAC_CONCAT(_##entry_name, __LINE__) \
-            (NAC_GET_OP_REGISTRY(entry_name), data_type, dm_memcpy_d2h, dm_memcpy_h2d, dm_memcpy_d2d) ; \
+        static op_dm_register_memcpy NAC_CONCAT(_##registry_name, __LINE__) \
+            (NAC_GET_OP_REGISTRY(registry_name), data_type, dm_memcpy_d2h, dm_memcpy_h2d, dm_memcpy_d2d) ; \
     }
 
-
-#define NAC_OP_DM_REGISTER_UNIT(entry_name, data_type, dm_unit) \
+#define NAC_OP_REGISTER_DM_UNIT(registry_name, data_type, dm_unit) \
     namespace { \
-        static op_dm_register_unit NAC_CONCAT(_##entry_name, __LINE__) \
-            (NAC_GET_OP_REGISTRY(entry_name), data_type, dm_unit) ; \
+        static op_dm_register_unit NAC_CONCAT(_##registry_name, __LINE__) \
+            (NAC_GET_OP_REGISTRY(registry_name), data_type, dm_unit) ; \
     }
+
+#endif
+
+#define NAC_OP_REGISTER_DM(registery_name, data_type, dm_allocator, dm_deleter, \
+                            dm_memcpy_d2h, dm_memcpy_h2d, dm_memcpy_d2d, \
+                            dm_unit)  \
+    namespace { \
+        static op_dm_register NAC_CONCAT(_##registry_name, __LINE__) \
+            (NAC_GET_OP_REGISTRY(registry_name), data_type, dm_allocator,   \
+                dm_deleter, dm_memcpy_d2h, dm_memcpy_h2d, dm_memcpy_d2d, dm_unit) ; \
+    }
+
 
 namespace nac{
 /*
@@ -72,8 +84,15 @@ namespace nac{
 class op_registry{
 public:
     typedef std::unordered_map<std::string, std::unique_ptr<operator_base>> op_map_type;
-    typedef std::pair<int, op_map_type> data_entry_type;
+    //typedef std::pair<int, op_map_type> data_entry_type;
     typedef std::pair<int, data_mm>     data_mm_type;
+
+    struct data_entry_type{
+        int                 data_type;  // key
+
+        op_map_type         op_map;
+        data_mm             op_dm;
+    };
 
     op_registry(const char * _name){name()=_name;}
     ~op_registry(){
@@ -88,6 +107,15 @@ public:
         return register_op(data_type, op_name, op);
     }
 #endif
+    inline int register_op_dm(int data_type, data_mm & dm){
+        if(data_type >= NAC_DATA_MAX){
+            NAC_WARNING("try to insert data type ", data_type," exceed max ", NAC_DATA_MAX);
+            return -1;
+        }
+        try_locate_dm(data_type) = dm;
+        return 0;
+    }
+#if 0
     inline int register_dm_allocator(int data_type, void * (*dm_allocator)(int )){
         if(data_type >= NAC_DATA_MAX){
             NAC_WARNING("try to insert data type ", data_type," exceed max ", NAC_DATA_MAX);
@@ -137,7 +165,7 @@ public:
         dm.unit = dm_unit;
         return 0;
     }
-
+#endif
     inline int register_op(int data_type, std::string op_name, operator_base * op){
         int i;
         bool found_entry = false;
@@ -152,6 +180,7 @@ public:
                 break;
             }
         }
+
         if(!found_entry){
             //op_entries.push_back(data_type);
             std::string _s = data_type_to_str(data_type);
@@ -251,30 +280,30 @@ public:
     }
 
 private:
-    inline data_mm & try_locate_dm(int data_type){
+    inline data_entry_type & try_locate_entry(int data_type){
         bool found_entry = false;
         int i;
-        for(i=0;i<op_dms_.size();i++){
-            if(op_dms_[i].first == data_type)
+        for(i=0;i<op_maps_.size();i++){
+            if(op_maps_[i].data_type == data_type){
                 found_entry = true;
                 break;
+            }
         }
         if(!found_entry){
-            std::string dm_name;
-            dm_name += name();
-            dm_name += "-";
-            dm_name += data_type_to_str(data_type);
-            data_mm new_dm(dm_name.c_str());
+            std::string _s = data_type_to_str(data_type);
+            char * en = new char [_s.size()+1];
+            std:copy(_s.begin(), _s.end(), en);
+            op_entry_names_.push_back(en);
 
-            op_dms_.push_back(std::make_pair(data_type, new_dm));
-            i=op_dms_.size()-1;
+            data_entry_type new_entry;
+            op_maps_.push_back(new_entry);
+            i=op_maps_.size()-1;
         }
-        return op_dms_.at(i).second;
+        return op_maps_.at(i);
     }
     //std::unordered_map<std::string, std::unique_ptr<operator_base>>  op_map;
     std::vector<data_entry_type>    op_maps_;
-    std::vector<data_mm_type>   op_dms_;
-    std::vector<char *>        op_entry_names_;     // maybe data type as key.
+    std::vector<char *>             op_entry_names_;
 
 NAC_RW_ATTR(std::string, default_entry)
 NAC_R_ATTR(std::string, name)
@@ -289,6 +318,25 @@ struct op_register{
 };
 
 //------------------------------------------------------------------------
+
+struct op_dm_register{
+    op_dm_register(op_registry * opr, int data_type, 
+        data_mm::alloc_t alloc, data_mm::del_t del, 
+        data_mm::cpy_t cpy_d2h, data_mm::cpy_t cpy_h2d, data_mm::cpy_t cpy_d2d,
+        data_mm::unit_t unit ){
+
+        data_mm dm;
+        dm.allocator = alloc;
+        dm.deleter = del;
+        dm.memcpy_d2h = cpy_d2h;
+        dm.memcpy_h2d = cpy_h2d;
+        dm.memcpy_d2d = cpy_d2d;
+        dm.unit = unit;
+        opr->register_op_dm(dm);
+    }
+};
+
+#if 0
 struct op_dm_register_allocator{
     op_dm_register_allocator(op_registry * opr, int data_type,  void * (*dm_allocator)(int )){
         opr->register_dm_allocator(data_type, dm_allocator);
@@ -313,7 +361,7 @@ struct op_dm_register_unit{
         opr->register_dm_unit(data_type, dm_unit);
     }
 };
-
+#endif
 //------------------------------------------------------------------------
 
 // functions

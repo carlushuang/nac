@@ -18,7 +18,11 @@ enum class nac_memcpy_enum{
 class data_mm{
 public:
 
-typedef int (*memcpy_t) (void * src, int src_offset, void * dest, int dest_offset, int nmemb);
+typedef void *  (*alloc_t)  (int);
+typedef void    (*del_t)    (void*);
+// src_offset/dest_offset are not byte, they are number of element
+typedef int     (*cpy_t)    (void * src, int src_offset, void * dest, int dest_offset, int nmemb);
+typedef int     (*unit_t)   ();
 
     data_mm(const char* _name):
         name_(_name),
@@ -29,22 +33,18 @@ typedef int (*memcpy_t) (void * src, int src_offset, void * dest, int dest_offse
     data_mm():data_mm("N/A")
     {}
 
-    void *  (*allocator)    (int nmemb);    // contiguous memory
-    void    (*deleter)      (void* ptr);
-    //int     (*copy)         (void * src, int src_offset, void * dest, int dest_offset, 
-    //                            int nmemb, nac_memcpy_enum direction);
-    memcpy_t memcpy_d2h;
-    memcpy_t memcpy_h2d;
-    memcpy_t memcpy_d2d;
-    int     (*unit) ();
-
-    
+    alloc_t     allocator;
+    del_t       deleter;
+    cpy_t       memcpy_d2h;
+    cpy_t       memcpy_h2d;
+    cpy_t       memcpy_d2d;
+    unit_t      unit;
 
     const inline std::string & name(){
         return name_;
     }
 private:
-    std::string name_;
+    const std::string name_;
 };
 
 }
