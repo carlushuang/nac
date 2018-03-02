@@ -6,9 +6,12 @@
 #include <exception>
 #include <iostream>
 
-#define NAC_DATA_FP32   0x0
-#define NAC_DATA_FP16   0x1
-#define NAC_DATA_MAX    4
+#define NAC_DATA_FP32           0
+#define NAC_DATA_FP16           1
+
+#define NAC_DATA_DEV_TYPE_1     6
+#define NAC_DATA_DEV_TYPE_2     7
+#define NAC_DATA_MAX            8
 
 
 namespace nac{
@@ -56,7 +59,13 @@ inline const char * data_type_to_str(int data_type){
     if(data_type == NAC_DATA_FP16)
         return "fp16";
 
-    return "none";
+
+    if(data_type == NAC_DATA_DEV_TYPE_1)
+        return "dt1";
+    if(data_type == NAC_DATA_DEV_TYPE_2)
+        return "dt2";
+
+    return "n/a";
 }
 inline int str_to_data_type(const char * str){
     std::string s(str);
@@ -64,6 +73,11 @@ inline int str_to_data_type(const char * str){
         return NAC_DATA_FP32;
     if(s == "fp16")
         return NAC_DATA_FP16;
+
+    if(s == "dt1")
+        return NAC_DATA_DEV_TYPE_1;
+    if(s == "dt2")
+        return NAC_DATA_DEV_TYPE_2;
 
     return NAC_DATA_MAX;
 }

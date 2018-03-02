@@ -10,7 +10,7 @@ static bool is_device_available(nac_device dev){
     probe_compute_devices(available_devs);
     bool in_list= false;
     for(auto & cdev : available_devs){
-        if(cdev == device){
+        if(cdev == dev){
             in_list = true;
             break;
         }
@@ -19,7 +19,7 @@ static bool is_device_available(nac_device dev){
 }
 
 NAC_EXPORT nac_context nac_create_context(nac_device *  devices, int num_device){
-    if(!device || num_device==0 )
+    if(!dev || num_device==0 )
         return nullptr;
     for(int i=0;i<num_device;i++)
         if(!is_device_available(devices[i]))
@@ -36,17 +36,17 @@ NAC_EXPORT nac_status nac_release_context(nac_context ctx){
     return NAC_SUCCESS;
 }
 
-NAC_EXPORT nac_status nac_get_device_info(nac_device device, struct nac_device_info * info){
-    if(!device || !info)
+NAC_EXPORT nac_status nac_get_device_info(nac_device dev, struct nac_device_info * info){
+    if(!dev || !info)
         return NAC_INVALID_ARG;
-    if(!is_device_available(device))
+    if(!is_device_available(dev))
         return NAC_INVALID_DEVICE;
 
-    info->dev_name = device->name().c_str();
+    info->dev_name = dev->name().c_str();
 
-    info->num_op_entries = device->op_entries()->op_entry_count();
-    info->op_entry_names = device->op_entries()->op_entry_names().data();
-    std::string cur_en = device->current_entry_name();
+    info->num_op_entries = dev->op_registry()->op_entry_count();
+    info->op_entry_names = dev->op_registry()->op_entry_names().data();
+    std::string cur_en = dev->current_entry_name();
     if(cur_en.empty())
         info->current_op_entry = (const char *)0;
     else
@@ -72,39 +72,40 @@ NAC_EXPORT nac_status nac_get_devices(nac_device ** devices, int * num_devices){
 NAC_EXPORT nac_status nac_select_op_entry(nac_context  ctx, const char * entry_name){
     if(!ctx || !entry_name)
         return NAC_INVALID_ARG;
-    int ret = ctx->device()->select_op_entry(entry_name);
+    int ret = ctx->dev()->select_op_entry(entry_name);
     if(ret != 0)
         return NAC_INVALID_OP_ENTRY_NAME;
     return NAC_SUCCESS;
 }
 
-NAC_EXPORT nac_node nac_create_node(nac_context ctx, nac_device device, const char * entry_name, const char * op_name){
-    if(!ctx || ! device || !op_name)
+NAC_EXPORT nac_node nac_create_node(nac_context ctx, nac_op_entry op_entry,  const char * op_name){
+    if(!ctx || ! op_entry || !op_name)
         return nullptr;
     if(!check_op_supported(op_name)){
-        NAC_ERROR("desired op:", op_name, " is not supported");
+        NAC_ERROR("request op:", op_name, " is not supported");
         return nullptr;
     }
 
     bool found = false;
-    for(auto dev : ctx->devices()){
-        if(dev == device){
+    auto & dev =  op_entry->registry->working_device();
+    for(auto & d : ctx->devices()){
+        if(d == dev){
             found = true;
             break;
         }
     }
 
     if(!found){
-        NAC_ERROR("count not find the device");
+        NAC_ERROR("count not find the dev");
         return nullptr;
     }
 
-    op_registry * opr = device->op_entries();
+    op_registry * opr = dev->op_registry();
     operator_base * op;
 
-    op = opr->get_op(entry_name, layer_name  /*node name same as op name*/ );
+    op = opr->get_op(op_entry, op_name  /*node name same as op name*/ );
     if(!op){
-        NAC_ERROR("count not find node:", layer_name, " in device:", device->name());
+        NAC_ERROR("count not find node:", op_name, " in dev:", dev->name(), " with entry:", op_entry->name());
         return nullptr;
     }
 
@@ -122,8 +123,8 @@ NAC_EXPORT nac_status nac_release_node(nac_node nd){
 #endif
 
 
-NAC_EXPORT nac_tensor nac_create_tensor(int w, int h, int c, int n, void (*delete_data_func)(void*)){
-    return new tensor(w,h,c,n,delete_data_func);
+NAC_EXPORT nac_tensor nac_create_tensor(int w, int h, int c, int n){
+    return new tensor(w,h,c,n);
 }
 NAC_EXPORT nac_status nac_release_tensor(nac_tensor t){
     if(!t)
@@ -195,8 +196,8 @@ NAC_EXPORT nac_status nac_release_graph(nac_graph gr){
 }
 
 
-NAC_EXPORT nac_layer nac_create_layer(nac_context ctx, nac_device device, const char * entry_name, const char * layer_name){
-    if(!ctx || !device || !layer_name)
+NAC_EXPORT nac_layer nac_create_layer(nac_context ctx, nac_device dev, const char * entry_name, const char * layer_name){
+    if(!ctx || !dev || !layer_name)
         return nullptr;
 
     if(!check_op_supported(layer_name)){
@@ -205,24 +206,24 @@ NAC_EXPORT nac_layer nac_create_layer(nac_context ctx, nac_device device, const 
     }
 
     bool found = false;
-    for(auto dev : ctx->devices()){
-        if(dev == device){
+    for(auto d : ctx->devices()){
+        if(d == dev){
             found = true;
             break;
         }
     }
 
     if(!found){
-        NAC_ERROR("count not find the device");
+        NAC_ERROR("count not find the dev");
         return nullptr;
     }
 
-    op_registry * opr = device->op_entries();
+    op_registry * opr = dev->op_registry();
     operator_base * op;
 
     op = opr->get_op(entry_name, layer_name  /*node name same as op name*/ );
     if(!op){
-        NAC_ERROR("count not find node:", layer_name, " in device:", device->name());
+        NAC_ERROR("count not find node:", layer_name, " in dev:", dev->name());
         return nullptr;
     }
 

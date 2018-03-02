@@ -14,16 +14,17 @@ using _nac_operator = class operator_base;
 
 class operator_base {
 public:
-    operator_base(const char * _name) : full_record_name(_name), ref_cnt(0) {
-        layer_ = nullptr;
-        dev_ = nullptr;
-    }
+    
+    operator_base(const char * _name) : full_record_name_(_name), 
+            node_(nullptr), dev_(nullptr), ref_cnt(0) 
+    {}
+    operator_base() : operator_base("N/A") {}
     virtual ~operator_base(){
 
     }
 
     virtual int forward() = 0;
-    const std::string & name(){return full_record_name;}
+    const std::string & name(){return full_record_name_;}
 
     virtual node * & working_node() final {return node_;}
     virtual compute_device * & working_device() final {return dev_;}
@@ -69,9 +70,12 @@ protected:
 private:
     node               * node_;
     compute_device     * dev_;
-    std::string          full_record_name;
+    std::string          full_record_name_;
 
     std::atomic_uint    ref_cnt;
+
+
+friend struct op_register;
 
 DISABLE_COPY_AND_ASSIGN(operator_base)
 };

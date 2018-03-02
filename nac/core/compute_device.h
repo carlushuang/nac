@@ -11,9 +11,9 @@ using _nac_device = class compute_device;
 
 class compute_device{
 public:
-    compute_device(op_registry * _op_entries, const char * dev_name = nullptr){
-        op_entries() = _op_entries;
-        op_entries()->assign_working_device(this);
+    compute_device(op_registry * _op_regi, const char * dev_name = nullptr){
+        op_registry() = _op_entries;
+        op_registry()->assign_working_device(this);
         if(dev_name)
             name() = dev_name;
         else
@@ -78,7 +78,7 @@ private:
     void * (*workspace_allocator)(int _bytes);
     void (*workspace_deleter)(void * _ptr);
 
-NAC_RW_ATTR(op_registry *, op_entries)
+NAC_RW_ATTR(op_registry *, op_registry)
 NAC_R_ATTR(std::string, name)
 };
 
