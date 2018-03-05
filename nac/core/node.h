@@ -37,20 +37,20 @@ public:
         op_->put();
     }
 
-    inline void set_hparam(hyperparameter * _hparam){
-        hparam_ = _hparam;
+    inline void feed_hparam(hyperparameter * _hparam){
+        hparam_.reset(_hparam);
     }
 
     // input, hold only the pointer
-    inline void feed_input(tensor * x){
+    inline void set_input(tensor * x){
         inputs_.push_back(x);
     }
-    inline void feed_inputs(tensor ** x, int num){
+    inline void set_inputs(tensor ** x, int num){
         for(int i=0;i<num;i++){
             inputs_.push_back(x[i]);
         }
     }
-    inline void feed_inputs(std::vector<tensor*> &x_vec){
+    inline void set_inputs(std::vector<tensor*> &x_vec){
         for(auto x : x_vec){
             inputs_.push_back(x);
         }
@@ -103,7 +103,7 @@ public:
 protected:
     context             * ctx_;
     operator_base       * op_;
-    hyperparameter      * hparam_;
+    std::unique_ptr<hyperparameter> hparam_;
 
     std::vector<tensor*> inputs_;       // not resposible for input memory
 

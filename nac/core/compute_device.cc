@@ -47,7 +47,7 @@ void probe_compute_devices(compute_device** & dev_list, int & num){
     dev_list = g_dev_ptr_list.data();
     num = g_dev_ptr_list.size();
 }
-
+#if 0
 int compute_device::select_op_entry(const char * entry_name){
     op_registry::op_map_type * entry = op_registed_->get_ops(entry_name);
     if(!entry)
@@ -60,5 +60,5 @@ int compute_device::select_op_entry(const char * entry_name){
     current_entry_name_ = entry_name;
     return 0;
 }
-
+#endif
 }

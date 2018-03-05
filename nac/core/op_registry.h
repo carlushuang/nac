@@ -134,6 +134,10 @@ public:
         return 0;
     }
 
+    inline op_entry_type * get_op_entry(const char * entry_name){
+        return get_op_entry(str_to_data_type(entry_name));
+    }
+
     inline op_entry_type * get_op_entry(int data_type){
         for(auto &oe : op_entries_){
             if(data_type == oe.data_type){

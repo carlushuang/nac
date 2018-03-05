@@ -43,46 +43,31 @@ inline std::string make_string(const char* c_str) {
 }
 
 enum class activation_type{
-    LOGISTIC, RELU, RELIE, LINEAR, RAMP, TANH, PLSE, LEAKY, ELU, LOGGY, STAIR, HARDTAN, LHTAN
+    LOGISTIC, RELU, RELIE, LINEAR, RAMP, TANH, PLSE, LEAKY, ELU, LOGGY, STAIR, HARDTAN, LHTAN, UNKNOWN
 };
 
-
-//#define NAC_OP_NAME(entry_name, data_type, op_name)  \
+//#define NAC_OP_NAME(entry_name, data_type, op_name)
 //        #entry_name "-" #data_type "-"  #op_name 
 inline std::string nac_op_name(std::string entry_name, std::string data_type, std::string bare_op_name){
     return entry_name+"-"+data_type+"-"+bare_op_name;
 }
 
-inline const char * data_type_to_str(int data_type){
-    if(data_type == NAC_DATA_FP32)
-        return "fp32";
-    if(data_type == NAC_DATA_FP16)
-        return "fp16";
+const char * data_type_to_str(int data_type);
+int str_to_data_type(const char * str);
+activation_type str_to_act_type(const char * str);
+const char * act_type_to_str(activation_type act);
 
 
-    if(data_type == NAC_DATA_DEV_TYPE_1)
-        return "dt1";
-    if(data_type == NAC_DATA_DEV_TYPE_2)
-        return "dt2";
-
-    return "n/a";
-}
-inline int str_to_data_type(const char * str){
-    std::string s(str);
-    if(s == "fp32")
-        return NAC_DATA_FP32;
-    if(s == "fp16")
-        return NAC_DATA_FP16;
-
-    if(s == "dt1")
-        return NAC_DATA_DEV_TYPE_1;
-    if(s == "dt2")
-        return NAC_DATA_DEV_TYPE_2;
-
-    return NAC_DATA_MAX;
 }
 
-}
+
+#ifdef __GNUC__
+# define likely(x)          __builtin_expect(!!(x), 1)
+# define unlikely(x)        __builtin_expect(!!(x), 0)
+#else
+# define likely(x)
+# define unlikely(x)
+#endif
 
 #ifdef NDEBUG
 #define NAC_ASSERT(cond, msg)

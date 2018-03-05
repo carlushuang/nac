@@ -18,6 +18,7 @@ enum class nac_memcpy_enum{
 class data_mm{
 public:
 
+// int are nmemb, not bytes.
 typedef void *  (*alloc_t)  (int);
 typedef void    (*del_t)    (void*);
 // src_offset/dest_offset are not byte, they are number of element

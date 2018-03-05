@@ -26,8 +26,8 @@ public:
         clear_workspace();
     }
 
-    int select_op_entry(const char * entry_name);
-    inline const std::string & current_entry_name()const {return current_entry_name_;}
+    //int select_op_entry(const char * entry_name);
+    //inline const std::string & current_entry_name()const {return current_entry_name_;}
 
     void init(){}
 
@@ -69,8 +69,8 @@ public:
     }
 
 private:
-    std::string                   current_entry_name_;
-    std::vector<operator_base *>  current_ops_;
+    //std::string                   current_entry_name_;
+    //std::vector<operator_base *>  current_ops_;
 
     void              * workspace_ptr;
     int                 workspace_bytes;
@@ -78,7 +78,7 @@ private:
     void * (*workspace_allocator)(int _bytes);
     void (*workspace_deleter)(void * _ptr);
 
-NAC_RW_ATTR(op_registry *, op_registry)
+NAC_RW_ATTR(op_registry *, registry)
 NAC_R_ATTR(std::string, name)
 };
 
