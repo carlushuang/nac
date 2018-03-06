@@ -102,7 +102,7 @@ void graph::feed_inputs(std::vector<tensor*> & t_vec){
     }
 }
 
-tensor * graph::output(int idx = 0) const{
+tensor * graph::output(int idx) const{
     // TODO: aync query output
     // assume output is from the last of nodes
     if(nodes.empty()){

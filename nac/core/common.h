@@ -105,13 +105,13 @@ const char * act_type_to_str(activation_type act);
         type name##_; \
     public:\
         inline type & name () {return this->name##_;} \
-        inline type name () const {return this->name##_;}
+        inline type const & name () const {return this->name##_;}
 
 #define NAC_R_ATTR(type, name) \
     private: \
         type name##_; \
     public:\
-        inline type name () const {return this->name##_;}
+        inline type const & name () const {return this->name##_;}
 
 
 #define DISABLE_COPY_AND_ASSIGN(classname)  \

@@ -13,6 +13,9 @@
 #include <algorithm>
 #include <atomic>
 
+#define NAC_EXPORT_API_HIDDEN
+#include <nac.h>
+
 #define NAC_OP_REGISTRY_DECLARE(registry_name) \
     NAC_LOCAL op_registry * get_registry_##registry_name();
 
@@ -60,12 +63,14 @@ public:
 
     class op_entry_type{
     public:
+        op_entry_type(op_registry * _regi, int _dt);
         op_registry       * registry;
         int                 data_type;  // key
 
         op_map_type         op_map;
         data_mm             op_dm;
-        std::atomic_uint    ref_cnt;
+        //std::atomic_uint    ref_cnt;
+        unsigned int        ref_cnt;        // TODO: movable usage for atomic type
     };
 
     static inline std::string gen_full_op_name(const char * _registry_name, const char * _data_type_str, const char * _op_name){
@@ -116,7 +121,7 @@ NAC_R_ATTR(std::string, name)
 DISABLE_COPY_AND_ASSIGN(op_registry)
 };
 
-using  _nac_op_entry =  class op_registry::op_entry_type;
+using  _nac_op_entry =  op_registry::op_entry_type;
 
 // helper class to register op
 struct op_register{

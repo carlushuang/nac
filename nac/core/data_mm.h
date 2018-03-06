@@ -31,11 +31,11 @@ typedef int     (*unit_t)   ();
     cpy_t       memcpy_d2d;
     unit_t      unit;
 
-    const inline std::string & name(){
+    inline const std::string & name(){
         return name_;
     }
 private:
-    const std::string name_;
+    std::string name_;
 };
 
 }

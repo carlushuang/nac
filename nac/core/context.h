@@ -1,5 +1,7 @@
 #ifndef NAC_CONTEXT_H
 #define NAC_CONTEXT_H
+
+#include "common.h"
 #include <vector>
 #include <mutex>
 
@@ -16,7 +18,7 @@ public:
 NAC_RW_ATTR(std::vector<compute_device *>, devices)
 };
 
-using _nac_context = class context;
+using _nac_context = context;
 
 }
 

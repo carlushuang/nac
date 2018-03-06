@@ -28,14 +28,14 @@
 
 namespace nac{
 
-typedef class _nac_context      * nac_context;
-typedef class _nac_operator     * nac_operator;
-typedef class _nac_node         * nac_node;
-typedef class _nac_device       * nac_device;
-typedef class _nac_tensor       * nac_tensor;
-typedef class _nac_graph        * nac_graph;
-typedef class _nac_op_entry     * nac_op_entry;
-typedef class _nac_hparam       * nac_hparam;
+typedef void *        nac_context;
+typedef void *        nac_operator;
+typedef void *        nac_node;
+typedef void *        nac_device;
+typedef void *        nac_tensor;
+typedef void *        nac_graph;
+typedef void *        nac_op_entry;
+typedef void *        nac_hparam;
 
 typedef int                     nac_status;
 

@@ -8,6 +8,7 @@
 
 namespace nac{
 
+class hparam_map;
 class hyperparameter{
 public:
     hyperparameter(){}

@@ -1,9 +1,9 @@
 #ifndef NAC_OBSERVER_H
 #define NAC_OBSERVER_H
 
-#include "observable.h"
-
 namespace nac{
+
+class observable;
 
 class observer{
 public:
@@ -11,10 +11,10 @@ public:
     virtual ~observer(){}
 
     observable *& target() { return target_;}
-    const observable *& target() const { return target_;}
+    observable * const & target() const { return target_;}
 
-    virtual start(){}
-    virtual stop(){}
+    virtual void start(){}
+    virtual void stop(){}
 private:
     observable * target_;
 };

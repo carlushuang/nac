@@ -20,6 +20,8 @@ namespace nac{
  * 2) use external memory buffer  (do not apply _dm in ctor)
  * 
  */
+// TODO:
+// maybe implement copy-on-write with shared_ptr
 class tensor{
 public:
     //tensor(int _w, int _h, int _c, int _n, void * _ptr, data_mm * _dm = nullptr) :
@@ -180,7 +182,7 @@ private:
     NAC_R_ATTR(data_mm*, dm)
 };
 
-using _nac_tensor = class tensor;
+using _nac_tensor = tensor;
 
 }
 

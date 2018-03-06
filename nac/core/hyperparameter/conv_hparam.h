@@ -7,7 +7,7 @@ public:
         padding_ = hparam_to_int(pmap->find_param("padding"));
         stride_ = hparam_to_int(pmap->find_param("stride"));
         filters_ = hparam_to_int(pmap->find_param("filters"));
-        act_type_ = hparam_to_int(pmap->find_param("activation"));
+        act_type_ = hparam_to_act(pmap->find_param("activation"));
     }
 private:
     virtual void outsize(int * out_w, int * out_h, int * out_c, int * out_n){

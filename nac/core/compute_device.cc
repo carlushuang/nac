@@ -19,7 +19,7 @@ static inline void init_probe_devices(){
 
     op_registry * default_c_op_regi = get_registry_entry("c");
     compute_device * default_c_device = new compute_device(default_c_op_regi);
-    default_c_device->select_op_entry("fp32");
+    //default_c_device->select_op_entry("fp32");
     g_dev_list.emplace_back(default_c_device);
 
     // TODO: dlopen to get dev from shlib
@@ -65,13 +65,13 @@ int compute_device::select_op_entry(const char * entry_name){
 
 
 
-compute_device::compute_device(op_registry * _op_regi, const char * dev_name = nullptr){
+compute_device::compute_device(op_registry * _op_regi, const char * dev_name ){
     registry_ = _op_regi;
     registry_->assign_working_device(this);
     if(dev_name)
-        name() = dev_name;
+        name_ = dev_name;
     else
-        name() = _op_regi->name();
+        name_ = _op_regi->name();
 
     workspace_allocator = nullptr;
     workspace_deleter = nullptr;
@@ -113,7 +113,7 @@ void compute_device::clear_workspace() {
     }
     // default cpu based deleter
     if(workspace_ptr){
-        delete [] workspace_ptr;
+        delete [] (unsigned char*)workspace_ptr;
         workspace_bytes = 0;
     }
 }

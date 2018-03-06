@@ -41,10 +41,12 @@ const std::unordered_set<std::string> & supported_op_names(){
 
 int release_unused_entry(std::string entry_keep, int data_type_keep){
     for(auto & it : regi_entry_map){
+#if 0
         if(it.first == entry_keep)
             it.second->release_unused(entry_keep);  // keep one, release else
         else
             it.second->release_unused(-1);  // release all
+#endif
     }
     op_list.clear();
 }
@@ -55,6 +57,7 @@ bool check_op_supported(std::string op_name){
     return true;
 }
 
+NAC_OP_REGISTRY_DECLARE(c);
 class __default_op_entry{
 public:
     __default_op_entry(){
@@ -71,7 +74,9 @@ static __default_op_entry  default_op_entry;
 
 
 
-
+op_registry::op_entry_type::op_entry_type(op_registry * _regi, int _dt) : 
+        registry(_regi), data_type(_dt), ref_cnt(0)
+{}
 
 
 
@@ -124,11 +129,11 @@ int op_registry::register_op(int data_type, std::string op_name, operator_base *
     return 0;
 }
 
-op_entry_type * op_registry::get_op_entry(const char * entry_name){
+op_registry::op_entry_type * op_registry::get_op_entry(const char * entry_name){
     return get_op_entry(str_to_data_type(entry_name));
 }
 
-op_entry_type * op_registry::get_op_entry(int data_type){
+op_registry::op_entry_type * op_registry::get_op_entry(int data_type){
     for(auto &oe : op_entries_){
         if(data_type == oe.data_type){
             oe.ref_cnt++;
@@ -137,7 +142,7 @@ op_entry_type * op_registry::get_op_entry(int data_type){
     }
     return nullptr;
 }
-void op_registry::put_op_entry(op_entry_type * _oe){
+void op_registry::put_op_entry(op_registry::op_entry_type * _oe){
     for(auto &oe : op_entries_){
         if(_oe == &oe && _oe->registry == this){
             oe.ref_cnt--;
@@ -146,7 +151,7 @@ void op_registry::put_op_entry(op_entry_type * _oe){
     }
 }
 
-operator_base * op_registry::get_op(op_entry_type * _oe, const char * _op_name){
+operator_base * op_registry::get_op(op_registry::op_entry_type * _oe, const char * _op_name){
     if(!_oe || !_op_name)
         return nullptr;
     NAC_ASSERT(this==_oe->registry, "it seems you try to query from a different registry");
@@ -181,7 +186,7 @@ compute_device * & op_registry::working_device() {
     return dev_;
 }
 
-op_entry_type & op_registry::try_locate_entry(int data_type){
+op_registry::op_entry_type & op_registry::try_locate_entry(int data_type){
     bool found_entry = false;
     int i;
     for(i=0;i<op_entries_.size();i++){
@@ -194,14 +199,15 @@ op_entry_type & op_registry::try_locate_entry(int data_type){
         // store a ptr ** of op names for request use
         std::string _s = data_type_to_str(data_type);
         char * en = new char [_s.size()+1];
-        std:copy(_s.begin(), _s.end(), en);
+        std::copy(_s.begin(), _s.end(), en);
         op_entry_names_.push_back(en);
 
         // new empty entry
-        op_entry_type new_entry;
-        new_entry.data_type = data_type;
-        new_entry.registry = this;
-        op_entries_.push_back(std::move(new_entry));
+        //op_registry::op_entry_type new_entry;
+        //new_entry.data_type = data_type;
+        //new_entry.registry = this;
+        //op_entries_.push_back(std::move(new_entry));
+        op_entries_.emplace_back(this, data_type);
         i=op_entries_.size()-1;
     }
     return op_entries_.at(i);
@@ -224,7 +230,7 @@ op_dm_register::op_dm_register(op_registry * opr, int data_type,
     dm.memcpy_h2d = cpy_h2d;
     dm.memcpy_d2d = cpy_d2d;
     dm.unit = unit;
-    opr->register_op_dm(dm);
+    opr->register_op_dm(data_type, dm);
 }
 
 

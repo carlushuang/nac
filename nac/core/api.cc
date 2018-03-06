@@ -1,12 +1,22 @@
 #include <nac.h>
-#include "ctx.h"
+// exported header first, in case we hidden api in the following
+
+#include "context.h"
+#include "compute_device.h"
+#include "hyperparameter.h"
+#include "operator_base.h"
+#include "node.h"
+#include "graph.h"
+#include "op_registry.h"
+#include "tensor.h"
+
 
 /* export api */
 
 using namespace nac;
 
 /* context related api */
-static bool is_device_available(nac_device dev){
+static bool is_device_available(compute_device dev){
     std::vector<compute_device*> available_devs;
     probe_compute_devices(available_devs);
     bool in_list= false;
@@ -22,11 +32,12 @@ static bool is_device_available(nac_device dev){
 NAC_EXPORT nac_context nac_create_context(nac_device *  devices, int num_device){
     if(!dev || num_device==0 )
         return nullptr;
+    compute_device ** ds = (compute_device**)devices;
     for(int i=0;i<num_device;i++)
-        if(!is_device_available(devices[i]))
+        if(!is_device_available(ds[i]))
             return nullptr;
 
-    nac_context ctx = new context(devices, num_device);
+    context ctx = new context(ds, num_device);
     return ctx;
 }
 
@@ -41,28 +52,29 @@ NAC_EXPORT nac_status nac_release_context(nac_context ctx){
 NAC_EXPORT nac_status nac_get_device_info(nac_device dev, struct nac_device_info * info){
     if(!dev || !info)
         return NAC_INVALID_ARG;
-    if(!is_device_available(dev))
+    compute_device * d = (compute_device *)dev;
+    if(!is_device_available(d))
         return NAC_INVALID_DEVICE;
 
-    info->dev_name = dev->name().c_str();
+    info->dev_name = d->name().c_str();
 
-    info->num_op_entries = dev->registry()->op_entry_count();
-    info->op_entry_names = dev->registry()->op_entry_names().data();
+    info->num_op_entries = d->registry()->op_entry_count();
+    info->op_entry_names = d->registry()->op_entry_names().data();
     // std::string cur_en = dev->current_entry_name();
 
     return NAC_SUCCESS;
 }
 
 NAC_EXPORT nac_status nac_get_devices(nac_device ** devices, int * num_devices){
-    nac_device * devs;
+    compute_device * devs;
     int num_devs;
     if(!devices || !num_devices)
         return NAC_INVALID_ARG;
-    probe_compute_devices(devs, num_devs);
+    probe_compute_devices(&devs, &num_devs);
     if(num_devs == 0)
         return NAC_DEVICE_NOT_FOUND;
 
-    *devices = devs;
+    *devices = (void*)devs;
     *num_devices = num_devs;
 
     return NAC_SUCCESS;
@@ -76,8 +88,9 @@ NAC_EXPORT nac_status nac_put_device(nac_device dev){
 NAC_EXPORT nac_op_entry nac_get_op_entry(nac_device dev, const char * entry_name){
     if(!dev || !entry_name)
         return nullptr;
+    compute_device * d = (compute_device *)dev;
 
-    return dev->registry()->get_op_entry(entry_name);
+    return d->registry()->get_op_entry(entry_name);
 }
 //NAC_EXPORT nac_status nac_get_op_entries(nac_device dev, nac_op_entry * entries, int * num_entries){
 //
@@ -85,7 +98,8 @@ NAC_EXPORT nac_op_entry nac_get_op_entry(nac_device dev, const char * entry_name
 NAC_EXPORT nac_status nac_put_op_entry(nac_op_entry op_entry){
     if(!op_entry)
         return NAC_INVALID_ARG;
-    op_entry->registry->put_op_entry(op_entry);
+    op_registry::op_entry_type * ope = (op_registry::op_entry_type *)op_entry;
+    ope->registry->put_op_entry(ope);
     return NAC_SUCCESS;
 }
 
@@ -282,7 +296,8 @@ NAC_EXPORT nac_status nac_copy_tensor_data(void * src, int src_offset, void * de
     }else if(direction == TENSOR_COPY_D2D){
         tensor * t_src = static_cast<tensor*>(src);
         tensor * t_dest = static_cast<tensor*>(dest);
-        rtn = t_src->copy(t_dest,dest_offset, src_offset, nmemb  );
+        //rtn = t_src->copy(t_dest,dest_offset, src_offset, nmemb  );
+        rtn = t_dest->copy(*t_src,src_offset, dest_offset, nmemb  );
         if(rtn == 0)
             return NAC_SUCCESS;
     }
