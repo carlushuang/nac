@@ -3,12 +3,9 @@
 #include <vector>
 #include <mutex>
 
-#include "compute_device.h"
-#include <vector>
-
 namespace nac{
 
-using _nac_context = class context;
+class compute_device;
 
 class context{
 public:
@@ -18,6 +15,8 @@ public:
 
 NAC_RW_ATTR(std::vector<compute_device *>, devices)
 };
+
+using _nac_context = class context;
 
 }
 

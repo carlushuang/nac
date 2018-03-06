@@ -70,7 +70,7 @@ const char * act_type_to_str(activation_type act);
 #endif
 
 #ifdef NDEBUG
-#define NAC_ASSERT(cond, msg)
+#define NAC_ASSERT(cond, ...)
 #else
 #define NAC_ASSERT(cond, ... ) \
     do{ \

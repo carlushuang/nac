@@ -7,8 +7,6 @@
 
 namespace nac{
 
-using _nac_tensor = class tensor;
-
 #define WARN_USE_EXTERN_BUFFER()  \
     NAC_WARNING("this tensor ", this, " does not have a data memory manager, please transfer tensor data by your self")
 
@@ -181,6 +179,8 @@ private:
     NAC_R_ATTR(int, n)
     NAC_R_ATTR(data_mm*, dm)
 };
+
+using _nac_tensor = class tensor;
 
 }
 

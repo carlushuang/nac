@@ -3,17 +3,7 @@
 
 #include <string>
 
-
 namespace nac{
-
-#if 0
-enum class nac_memcpy_enum{
-    h2h = 0,    // host to host
-    h2d,        // host to device
-    d2h,        // device to host
-    d2d,        // device to device
-};
-#endif
 
 class data_mm{
 public:

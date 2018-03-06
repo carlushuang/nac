@@ -67,8 +67,6 @@ NAC_EXPORT nac_status nac_put_op_entry(nac_op_entry op_entry);
 NAC_EXPORT nac_context nac_create_context(nac_device * devices, int num_device);
 NAC_EXPORT nac_status nac_release_context(nac_context  ctx);
 
-// select only one op_entry to be used in this context
-// NAC_EXPORT nac_status nac_select_op_entry(nac_context ctx, const char * entry_name);
 
 NAC_EXPORT nac_hparam nac_create_hparam(const char * op_name);
 NAC_EXPORT nac_status nac_set_hparam(nac_hparam hparam, const char * param_name, const char * value);
@@ -94,7 +92,7 @@ NAC_EXPORT nac_tensor nac_create_tensor(nac_op_entry op_entry, int w, int h, int
 NAC_EXPORT nac_status nac_release_tensor(nac_tensor t);
 NAC_EXPORT nac_status nac_get_tensor_info(nac_tensor t, nac_tensor_info * info);
 NAC_EXPORT nac_status nac_set_tensor_data_raw(nac_tensor t, void * data);
-NAC_EXPORT nac_status nac_get_tensor_data_raw(nac_tensor t);
+NAC_EXPORT void * nac_get_tensor_data_raw(nac_tensor t);
 NAC_EXPORT nac_status nac_copy_tensor_data(void * src, int src_offset, void * dest, int dest_offset, 
                                             int nmemb, enum tensor_copy_direct direction);
 

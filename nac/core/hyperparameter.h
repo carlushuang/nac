@@ -25,9 +25,6 @@ NAC_RW_ATTR(int, batch)
 NAC_RW_ATTR(node*, op_node)
 };
 
-
-using _nac_hparam = hparam_map;
-
 class hparam_map{
 public:
     hparam_map(const char * for_op_name) : name_(for_op_name) {}
@@ -48,6 +45,8 @@ private:
     std::unordered_map<std::string, std::string>   param_map;
     NAC_R_ATTR(std::string, name)
 };
+
+using _nac_hparam = class hparam_map;
 
 int hparam_to_int(const char * value){
     NAC_ASSERT(value);

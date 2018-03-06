@@ -10,8 +10,6 @@
 
 namespace nac{
 
-using _nac_operator = class operator_base;
-
 class operator_base {
 public:
     
@@ -79,6 +77,8 @@ friend struct op_register;
 
 DISABLE_COPY_AND_ASSIGN(operator_base)
 };
+
+using _nac_operator = class operator_base;
 
 }
 

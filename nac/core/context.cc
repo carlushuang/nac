@@ -1,4 +1,5 @@
 #include "context.h"
+#include "compute_device.h"
 #include <mutex>
 
 namespace nac{

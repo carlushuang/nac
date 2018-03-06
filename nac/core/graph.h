@@ -2,9 +2,6 @@
 #define NAC_GRAPH_H
 
 #include "observable.h"
-#include "context.h"
-#include "node.h"
-#include "tensor.h"
 #include "common.h"
 #include <vector>
 #include <memory>
@@ -13,23 +10,14 @@
 
 namespace nac{
 
-using _nac_graph = class graph;
+class context;
+class node;
+class tensor;
 
 class graph : public observable{
 public:
-    graph(context * _ctx) :ctx(_ctx), execution_thread(nullptr), execution_need_exit(false),
-        in_execution(false)
-        {}
-    virtual ~graph(){
-        if(execution_thread){
-            execution_need_exit = true;
-            execution_thread->join();
-            delete execution_thread;
-            in_execution = false;
-        }
-        release_nodes();
-        release_inputs();
-    }
+    graph(context * _ctx);
+    virtual ~graph();
     inline bool is_executing() const{
         return in_execution.load();
     }
@@ -37,39 +25,8 @@ public:
         return loop_cnt.load();
     }
 
-    inline void start_inference(int loop, bool need_wait){
-        if(need_wait){
-            in_execution = true;
-            for(int i=0;i<loop;i++){
-                inference_once();
-            }
-            in_execution = false;
-        }else {
-            if(!execution_thread && !in_execution){
-                in_execution = true;
-                execution_need_exit = false;
-                execution_thread = new std::thread([&, this](){
-                    if(loop<=0){
-                        while(!execution_need_exit) // give a chance that infinit loop can stop
-                            inference_once();
-                    }else{
-                        while(!execution_need_exit && loop--)
-                            inference_once();
-                    }
-                });
-            }
-        }
-    }
-
-
-    inline void wait(){
-        // block for execution finish
-        if(execution_thread && in_execution){
-            execution_thread->join();
-            delete execution_thread;
-            in_execution = false;
-        }
-    }
+    void start_inference(int loop, bool need_wait);
+    void wait();
 
 #if 0
     inline void inference_loop(int loop){
@@ -80,76 +37,22 @@ public:
         in_execution = false;
     }
 #endif
-    inline void attach_node(node * n){
-        if(in_execution)
-            return;
-        nodes.emplace_back(n);
-    }
-    inline void attach_nodes(node ** n, int num){
-        if(in_execution)
-            return;
-        for(int i=0;i<num;i++){
-            nodes.emplace_back(n[i]);
-        }
-    }
-    inline void attach_nodes(std::vector<node*> & n_vec){
-        if(in_execution)
-            return;
-        for(auto & n : n_vec){
-            nodes.emplace_back(n);
-        }
-    }
-    inline void release_nodes(){
-        if(in_execution)
-            return;
-        for(auto it = nodes.begin(); it != nodes.end();){
-            it = nodes.erase(it);
-        }
-    }
-    inline void release_inputs(){
-        if(in_execution)
-            return;
-        for(auto it = inputs.begin(); it != inputs.end();){
-            it = inputs.erase(it);
-        }
-    }
+    void attach_node(node * n);
+    void attach_nodes(node ** n, int num);
+    void attach_nodes(std::vector<node*> & n_vec);
 
-    inline void feed_input(tensor * t){
-        inputs.emplace_back(t);
-    }
-    inline void feed_inputs(tensor ** t, int num){
-        for(int i=0;i<num;i++){
-            inputs.emplace_back(t[i]);
-        }
-    }
-    inline void feed_inputs(std::vector<tensor*> & t_vec){
-        for(auto & t : t_vec){
-            inputs.emplace_back(t);
-        }
-    }
+    void release_nodes();
+    void release_inputs();
 
-    inline tensor * output(int idx = 0) const{
-        // TODO: aync query output
-        // assume output is from the last of nodes
-        if(nodes.empty()){
-            NAC_ERROR("no op node in current graph, get the output is not valid");
-            return nullptr;
-        }
-        NAC_ASSERT(idx<nodes.size(), "request idx:", idx, " is bigger than total nodes number", nodes.size());
-        return nodes.at(idx)->output(idx);;
-    }
+    void feed_input(tensor * t);
+    void feed_inputs(tensor ** t, int num);
+    void feed_inputs(std::vector<tensor*> & t_vec);
+
+    tensor * output(int idx = 0) const;
 
 private:
 
-    void inference_once(){
-        start_observe();
-        for(auto & n : nodes)
-            n->forward();
-
-        loop_cnt++;
-        stop_observe();
-    }
-
+    void inference_once();
 
     context * ctx;
     std::vector<std::unique_ptr<node>> nodes;
@@ -162,6 +65,8 @@ private:
 
 DISABLE_COPY_AND_ASSIGN(graph)
 };
+
+using _nac_graph = class graph;
 
 }
 

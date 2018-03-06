@@ -1,4 +1,5 @@
 #include "compute_device.h"
+#include "op_registry.h"
 #include <mutex>
 #include <memory>
 
@@ -61,4 +62,60 @@ int compute_device::select_op_entry(const char * entry_name){
     return 0;
 }
 #endif
+
+
+
+compute_device::compute_device(op_registry * _op_regi, const char * dev_name = nullptr){
+    registry_ = _op_regi;
+    registry_->assign_working_device(this);
+    if(dev_name)
+        name() = dev_name;
+    else
+        name() = _op_regi->name();
+
+    workspace_allocator = nullptr;
+    workspace_deleter = nullptr;
+}
+
+compute_device::~compute_device(){
+    clear_workspace();
+}
+
+void compute_device::assign_workspace_allocator(void * (*allocator)(int ), void (*deleter)(void *)){
+    workspace_allocator = allocator;
+    workspace_deleter = deleter;
+}
+
+void * compute_device::request_workspace(int bytes) {
+    if(workspace_allocator){
+        workspace_ptr = workspace_allocator(bytes);
+        workspace_bytes = bytes;
+        return workspace_ptr;
+    }
+    // default cpu based allocator
+    if(!workspace_ptr){
+        workspace_ptr = static_cast<void*>(new unsigned char [bytes]);
+        workspace_bytes = bytes;
+    }
+    else{
+        if(bytes>workspace_bytes){
+            delete [] ((unsigned char *)workspace_ptr);
+            workspace_ptr = static_cast<void*>(new unsigned char [bytes]);
+            workspace_bytes = bytes;
+        }
+    }
+    return workspace_ptr;
+}
+void compute_device::clear_workspace() {
+    if(workspace_deleter){
+        workspace_deleter(workspace_ptr);
+        return;
+    }
+    // default cpu based deleter
+    if(workspace_ptr){
+        delete [] workspace_ptr;
+        workspace_bytes = 0;
+    }
+}
+
 }
