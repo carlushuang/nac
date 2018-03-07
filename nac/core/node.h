@@ -61,7 +61,6 @@ protected:
 DISABLE_COPY_AND_ASSIGN(node)
 };
 
-using _nac_node = class node;
 
 }
 

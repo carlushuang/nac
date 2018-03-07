@@ -66,7 +66,6 @@ private:
 DISABLE_COPY_AND_ASSIGN(graph)
 };
 
-using _nac_graph = class graph;
 
 }
 

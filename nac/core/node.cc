@@ -48,7 +48,7 @@ void node::set_inputs(std::vector<tensor*> &x_vec){
 std::vector<tensor*> node::inputs() const {
     return inputs_; //copy
 }
-const tensor * node::input(int idx=0) const {
+const tensor * node::input(int idx) const {
     NAC_ASSERT(idx < inputs_.size(), "request input index:", idx, " bigger than size:", inputs_.size());
     return inputs_.at(idx);
 }
@@ -67,7 +67,7 @@ void node::feed_weights(std::vector<tensor*> &w_vec){
         weights_.emplace_back(w);
     }
 }
-const tensor * node::weight(int idx=0) const {
+const tensor * node::weight(int idx) const {
     NAC_ASSERT(idx < weights_.size(), "request weight index:", idx, " bigger than size:", weights_.size());
     return weights_.at(idx).get();
 }
@@ -79,7 +79,7 @@ std::vector<tensor*> node::weights() const {
 }
 
 // output, readonly
-tensor * node::output(int idx = 0) const {
+tensor * node::output(int idx) const {
     NAC_ASSERT(idx < outputs_.size(), "request output index:", idx, " bigger than size:", outputs_.size());
     return outputs_.at(idx).get();
 }

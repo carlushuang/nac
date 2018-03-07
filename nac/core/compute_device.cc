@@ -43,10 +43,10 @@ void probe_compute_devices(std::vector<compute_device*> & dev_list){
         dev_list.push_back(ptr.get());
     }
 }
-void probe_compute_devices(compute_device** & dev_list, int & num){
+void probe_compute_devices(compute_device*** dev_list, int * num){
     init_once_probe_devices();
-    dev_list = g_dev_ptr_list.data();
-    num = g_dev_ptr_list.size();
+    *dev_list = g_dev_ptr_list.data();
+    *num = g_dev_ptr_list.size();
 }
 #if 0
 int compute_device::select_op_entry(const char * entry_name){

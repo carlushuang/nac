@@ -7,14 +7,16 @@
 
 namespace nac{
 
+using namespace utils;
+
 class op_c_fp32_conv : public operator_base{
 public:
-    void op_c_fp32_conv(const char * op_name) :  operator_base(op_name) {}
+    op_c_fp32_conv(const char * op_name) :  operator_base(op_name) {}
     ~op_c_fp32_conv () {}
 
     virtual int forward()
     {
-        const conv_hparam * param = static_cast<const conv_attr*>(hparam());
+        const conv_hparam * param = static_cast<const conv_hparam*>(hparam());
         const tensor * x = input(0);
         const tensor * filter = weight(0);
         tensor * out = output(0);
@@ -40,11 +42,11 @@ public:
 
             im2col_cpu((float*)x->data()+i*x->w()*x->h()*x->c(),
                 x->c(), x->h(), x->w(), param->kernel(), param->stride(), param->padding(), b);
-            gemm_cpu(0,0,m,n,k,1,a,k,b,n,1,c,n);
+            gemm_cpu(0,0,m,n,k,1,a,k,b,n,c,n);
         }
 
         if(param->act_type() != activation_type::LINEAR)
-            activate_cpu(out->data(), out->size(), param->act_type());
+            activate_cpu((float*)out->data(), out->size(), param->act_type());
         
         return 0;
     }

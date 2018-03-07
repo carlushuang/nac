@@ -15,9 +15,10 @@
 
 #define NAC_EXPORT_API_HIDDEN
 #include <nac.h>
+#undef  NAC_EXPORT_API_HIDDEN
 
 #define NAC_OP_REGISTRY_DECLARE(registry_name) \
-    NAC_LOCAL op_registry * get_registry_##registry_name();
+    NAC_LOCAL op_registry * get_registry_ ## registry_name ();
 
 #define NAC_OP_REGISTRY_DEFINE(registry_name)  \
     NAC_LOCAL op_registry * get_registry_##registry_name(){ \
@@ -29,12 +30,12 @@
 #define NAC_OP_REGISTER(registry_name, data_type, op_name, op_class) \
     namespace { \
         static op_register NAC_CONCAT(_##registry_name, __LINE__) \
-            (get_registry_##registry_name(), data_type, op_name, new op_class() ) ; \
+            (get_registry_##registry_name(), data_type, #op_name, new op_class(#op_name) ) ; \
     }
 
 #define NAC_GET_OP_REGISTRY(registry_name) get_registry_##registry_name()
 
-#define NAC_OP_REGISTER_DM(registery_name, data_type, dm_allocator, dm_deleter, \
+#define NAC_OP_REGISTER_DM(registry_name, data_type, dm_allocator, dm_deleter, \
                             dm_memcpy_d2h, dm_memcpy_h2d, dm_memcpy_d2d, \
                             dm_unit)  \
     namespace { \
@@ -121,7 +122,6 @@ NAC_R_ATTR(std::string, name)
 DISABLE_COPY_AND_ASSIGN(op_registry)
 };
 
-using  _nac_op_entry =  op_registry::op_entry_type;
 
 // helper class to register op
 struct op_register{

@@ -9,9 +9,9 @@ namespace nac{
 
 class op_c_fp32_softmax : public operator_base{
 public:
-    void op_c_fp32_softmax(const char * op_name) :  operator_base(op_name) {}
+    op_c_fp32_softmax(const char * op_name) :  operator_base(op_name) {}
     ~op_c_fp32_softmax () {}
-    virtual int forward(const tensor ** inputs, tensor * output)
+    virtual int forward()
     {
         // for cache friedly, we may ignore stride/group in darknet concept
         // consider all is row major, can lead to fast performance.

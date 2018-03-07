@@ -18,7 +18,6 @@ public:
 NAC_RW_ATTR(std::vector<compute_device *>, devices)
 };
 
-using _nac_context = context;
 
 }
 

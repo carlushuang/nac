@@ -10,13 +10,13 @@ namespace nac{
 
 class op_c_fp32_activation : public operator_base{
 public:
-    void op_c_fp32_activation(const char * op_name) :  operator_base(op_name) {}
+    op_c_fp32_activation(const char * op_name) :  operator_base(op_name) {}
     ~op_c_fp32_activation () {}
 
-    virtual int forward(const tensor ** inputs, tensor * output)
+    virtual int forward()
     {
         // point wise activation
-        const activation_hparam * param = static_cast<const activation_attr*>(hparam());
+        const activation_hparam * param = static_cast<const activation_hparam*>(hparam());
         const tensor * x = input(0);
         tensor * out = output(0);
         activate_cpu((float*) x->data(), (float*) out->data(), out->size(), param->act_type());

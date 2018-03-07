@@ -25,6 +25,8 @@ public:
 
     virtual node * & working_node() final {return node_;}
     virtual compute_device * & working_device() final {return dev_;}
+    virtual unsigned int get() final;
+    virtual unsigned int put() final;
 
 protected:
     virtual const tensor * input(int idx) const final;
@@ -33,11 +35,7 @@ protected:
 
     virtual hyperparameter * const hparam() const final;
     virtual context * const ctx() const final;
-    //virtual context * get_context() final{
-    //    return node_->ctx;
-    //}
-    virtual unsigned int get() final;
-    virtual unsigned int put() final;
+
     virtual void *  request_workspace(int bytes) final ;
 
 private:
@@ -52,8 +50,6 @@ friend struct op_register;
 
 DISABLE_COPY_AND_ASSIGN(operator_base)
 };
-
-using _nac_operator = operator_base;
 
 }
 

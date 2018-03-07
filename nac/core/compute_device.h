@@ -38,10 +38,9 @@ NAC_RW_ATTR(op_registry*, registry)
 NAC_R_ATTR(std::string, name)
 };
 
-using _nac_device = class compute_device;
 
 void probe_compute_devices(std::vector<compute_device*> & dev_list);
-void probe_compute_devices(compute_device** & dev_list, int & num);
+void probe_compute_devices(compute_device*** dev_list, int * num);
 
 }
 

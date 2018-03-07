@@ -1,15 +1,19 @@
 #include "op_c_registry.h"
 
+
 #include <operator_base.h>
 #include <hyperparameter.h>
 #include <tensor.h>
 #include <utils.h>
 
+
+#include <float.h>
+
 namespace nac{
 
 class op_c_fp32_maxpool : public operator_base{
 public:
-    void op_c_fp32_maxpool(const char * op_name) :  operator_base(op_name) {}
+    op_c_fp32_maxpool(const char * op_name) :  operator_base(op_name) {}
     ~op_c_fp32_maxpool () {}
     virtual int forward()
     {

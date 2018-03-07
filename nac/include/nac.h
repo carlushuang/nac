@@ -37,12 +37,12 @@ typedef void *        nac_graph;
 typedef void *        nac_op_entry;
 typedef void *        nac_hparam;
 
-typedef int                     nac_status;
+typedef int           nac_status;
 
 struct nac_device_info{
-    const char      *   dev_name;
-    const char      **  op_entry_names;
-    const int           num_op_entries;
+    char      *   dev_name;
+    char      **  op_entry_names;
+    int           num_op_entries;
 };
 struct nac_tensor_info{
     int w,h,c,n;

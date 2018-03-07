@@ -3,6 +3,7 @@
 
 #include "common.h"
 #include "node.h"
+#include "tensor.h"
 #include <unordered_map>
 #include <string>
 
@@ -47,9 +48,8 @@ private:
     NAC_R_ATTR(std::string, name)
 };
 
-using _nac_hparam = class hparam_map;
 
-int hparam_to_int(const char * value){
+inline int hparam_to_int(const char * value){
     NAC_ASSERT(value);
     try{
         return std::stoi(value);
@@ -58,12 +58,12 @@ int hparam_to_int(const char * value){
     }
     return -1;
 }
-activation_type hparam_to_act(const char * value){
+inline activation_type hparam_to_act(const char * value){
     NAC_ASSERT(value);
 
     return str_to_act_type(value);
 }
-float hparam_to_float(const char * value){
+inline float hparam_to_float(const char * value){
     NAC_ASSERT(value);
     try{
         return std::stof(value);
@@ -81,7 +81,7 @@ float hparam_to_float(const char * value){
 #include "hyperparameter/maxpool_hparam.h"
 #undef   _NAC_INCLUDE_HYPERPARAMETER_DETAIL
 
-hyperparameter * hyperparameter_factory(const char * bare_op_name){
+inline hyperparameter * hyperparameter_factory(const char * bare_op_name){
     NAC_ASSERT(bare_op_name);
     std::string s(bare_op_name);
     if(s == "conv" )
