@@ -1,6 +1,9 @@
 cmake_minimum_required(VERSION 2.8.8)
 
 project(nac)
+file(STRINGS "VERSION" nac_VERSION)
+string(REGEX REPLACE "^([0-9]+)\\..*" "\\1" nac_VERSION_MAJOR "${nac_VERSION}")
+string(REGEX REPLACE "^[0-9]+\\.([0-9]+).*" "\\1" nac_VERSION_MINOR "${nac_VERSION}")
 
 option(BUILD_TEST "build test" OFF)
 
@@ -17,6 +20,9 @@ endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
 add_subdirectory(nac)
 
+message(STATUS "nac_VERSION: ${nac_VERSION}")
+# message(STATUS "nac_VERSION_MAJOR: ${nac_VERSION_MAJOR}")
+# message(STATUS "nac_VERSION_MINOR: ${nac_VERSION_MINOR}")
 message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
-message(STATUS "CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")
+# message(STATUS "CMAKE_MODULE_PATH: ${CMAKE_MODULE_PATH}")

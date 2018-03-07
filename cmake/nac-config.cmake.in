@@ -1,0 +1,8 @@
+# - Config file for the nac package
+# It defines the following variables
+#  nac_INCLUDE_DIRS - include directories for nac
+#  nac_LIBRARIES    - libraries to link against
+
+
+set(nac_INCLUDE_DIRS )
+set(nac_LIBRARIES nac)
