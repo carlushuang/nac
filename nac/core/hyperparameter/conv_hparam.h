@@ -13,7 +13,7 @@ private:
     virtual void outsize(int * out_w, int * out_h, int * out_c, int * out_n){
         int w = op_node()->input()->w();
         int h = op_node()->input()->h();
-        int c = op_node()->input()->c();
+        //int c = op_node()->input()->c();
         int n = op_node()->input()->n();
 
         *out_n = n;

@@ -40,15 +40,17 @@ const std::unordered_set<std::string> & supported_op_names(){
 }
 
 int release_unused_entry(std::string entry_keep, int data_type_keep){
-    for(auto & it : regi_entry_map){
 #if 0
+    for(auto & it : regi_entry_map){
+
         if(it.first == entry_keep)
             it.second->release_unused(entry_keep);  // keep one, release else
         else
             it.second->release_unused(-1);  // release all
-#endif
     }
+#endif
     op_list.clear();
+    return 0;
 }
 bool check_op_supported(std::string op_name){
     auto found = op_list.find(op_name);
@@ -109,8 +111,6 @@ int op_registry::register_op_dm(int data_type, data_mm & dm){
 }
 
 int op_registry::register_op(int data_type, std::string op_name, operator_base * op){
-    int i;
-    bool found_entry = false;
     if(data_type >= NAC_DATA_MAX){
         NAC_WARNING("try to insert data type ", data_type," exceed max ", NAC_DATA_MAX);
         return -1;

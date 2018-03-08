@@ -1,8 +1,39 @@
-# - Config file for the nac package
+# - Find nac package installation
+#
 # It defines the following variables
+#  nac_FOUND        - has nac installed
 #  nac_INCLUDE_DIRS - include directories for nac
 #  nac_LIBRARIES    - libraries to link against
+#  nac_LIBRARIES_STATIC - static lib, only used on UNIX platform
+
+get_filename_component(_nac_rootdir ${CMAKE_CURRENT_LIST_DIR}/../../../ ABSOLUTE)
+
+find_path(_nac_include_dir nac.h HINTS ${_nac_rootdir}/include)
+
+find_library(_nac_library nac HINTS ${_nac_rootdir}/lib )
+if(UNIX)
+find_library(_nac_library_static libnac-static.a HINTS ${_nac_rootdir}/lib)
+endif()
+
+# handle the QUIETLY and REQUIRED arguments
+include(FindPackageHandleStandardArgs)
+if(UNIX)
+find_package_handle_standard_args(nac DEFAULT_MSG
+                    _nac_library _nac_include_dir _nac_library_static)
+else()
+find_package_handle_standard_args(nac DEFAULT_MSG
+                    _nac_library _nac_include_dir)
+endif()
 
 
-set(nac_INCLUDE_DIRS )
-set(nac_LIBRARIES nac)
+# only usefull in cmake-gui
+mark_as_advanced(_nac_include_dir _nac_library)
+if(UNIX)
+mark_as_advanced(_nac_library_static)
+endif()
+
+set(nac_INCLUDE_DIRS ${_nac_include_dir})
+set(nac_LIBRARIES ${_nac_library})
+if(UNIX)
+set(nac_LIBRARIES_STATIC ${_nac_library_static})
+endif()

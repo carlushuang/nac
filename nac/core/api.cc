@@ -82,6 +82,7 @@ NAC_EXPORT nac_status nac_get_devices(nac_device ** devices, int * num_devices){
 
 NAC_EXPORT nac_status nac_put_device(nac_device dev){
     (void)dev;
+    return NAC_SUCCESS;
 }
 
 /* op_entry related api */
@@ -215,7 +216,7 @@ NAC_EXPORT nac_status nac_graph_feed_input(nac_graph gr, nac_tensor * inputs, in
     return NAC_SUCCESS;
 }
 NAC_EXPORT nac_status nac_graph_init(nac_graph){
-
+    return NAC_SUCCESS;
 }
 NAC_EXPORT nac_status nac_graph_start_inference(nac_graph gr, int loop, int need_wait){
     if(!gr)

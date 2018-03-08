@@ -1,13 +1,16 @@
 #include <nac.h>
 #include <exception>
 #include <string>
+#include <iostream>
+
+using namespace nac;
 
 nac_device      g_device;
 nac_context     g_context;
 nac_op_entry    g_op_entry;
 
 void test_conv(const std::string & op_name){
-    nac_node test_node = nac_create_node(g_context, g_op_entry, test_op.c_str());
+    nac_node test_node = nac_create_node(g_context, g_op_entry, op_name.c_str());
     nac_graph test_graph = nac_create_graph(g_context);
     nac_graph_attach_node(test_graph, &test_node, 1);
 
@@ -20,10 +23,10 @@ void test_maxpool(const std::string & op_name){
 static struct {
     std::string op_name;
     void (*test)(const std::string &);
-} g_test_plan = {
+} g_test_plan[] = {
     {"conv",        test_conv},
     {"maxpool",     test_maxpool}
-}
+};
 
 void prepare(){
     nac_status ret;
@@ -37,7 +40,12 @@ void prepare(){
         std::terminate();
     
     for(i=0;i<num_devs;i++){
-        if(devs[i]->name() == "c")
+        nac_device_info di;
+        ret = nac_get_device_info(devs[i], &di );
+        if(ret != NAC_SUCCESS)
+            std::terminate();
+        std::string _dn(di.dev_name);
+        if(_dn == "c")
             break;
     }
     if(i == num_devs){
@@ -74,7 +82,7 @@ void prepare(){
     }
 
     // context
-    g_context = nac_create_context(g_device, 1);
+    g_context = nac_create_context(&g_device, 1);
     if(!g_context){
         std::cout<< "fail to create context"<<std::endl;
         std::terminate();

@@ -15,7 +15,7 @@ public:
     {
         // for cache friedly, we may ignore stride/group in darknet concept
         // consider all is row major, can lead to fast performance.
-        
+        return 0;
     }
 };
 
