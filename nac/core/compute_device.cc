@@ -32,8 +32,9 @@ static inline void init_once_probe_devices(){
     try{
         // call_once is safe in concurrent environment
         std::call_once(g_init_flag, [](){init_probe_devices();});
-    }catch(...){
-
+    }catch(const std::exception& e){
+        NAC_ERROR("init device error! ", e.what());
+        NAC_ABORT();
     }
 }
 

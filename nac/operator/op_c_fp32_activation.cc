@@ -19,7 +19,7 @@ public:
         const activation_hparam * param = static_cast<const activation_hparam*>(hparam());
         const tensor * x = input(0);
         tensor * out = output(0);
-        activate_cpu((float*) x->data(), (float*) out->data(), out->size(), param->act_type());
+        utils::activate_cpu((float*) x->data(), (float*) out->data(), out->size(), param->act_type());
         return 0;
     }
 };

@@ -74,6 +74,7 @@ NAC_EXPORT nac_status nac_get_devices(nac_device ** devices, int * num_devices){
     if(num_devs == 0)
         return NAC_DEVICE_NOT_FOUND;
 
+
     *devices = (void**)devs;
     *num_devices = num_devs;
 

@@ -46,7 +46,7 @@ public:
         }
 
         if(param->act_type() != activation_type::LINEAR)
-            activate_cpu((float*)out->data(), out->size(), param->act_type());
+            utils::activate_cpu((float*)out->data(), out->size(), param->act_type());
         
         return 0;
     }

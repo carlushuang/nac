@@ -24,9 +24,13 @@
 #define NAC_INVALID_TENSOR_COPY_DIRECT       -105
 
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef NAC_EXPORT_API_HIDDEN
 
-namespace nac{
+//namespace nac{
 
 typedef void *        nac_context;
 typedef void *        nac_operator;
@@ -96,8 +100,12 @@ NAC_EXPORT void * nac_get_tensor_data_raw(nac_tensor t);
 NAC_EXPORT nac_status nac_copy_tensor_data(void * src, int src_offset, void * dest, int dest_offset, 
                                             int nmemb, enum tensor_copy_direct direction);
 
-}
+//}
 
 #endif    // #ifndef NAC_EXPORT_API_HIDDEN
+
+#ifdef __cplusplus
+}  //extern "C" {
+#endif
 
 #endif

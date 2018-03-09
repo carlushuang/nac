@@ -59,11 +59,11 @@ void gemm_cpu(int ta, int tb,
         float *b, int ldb,
         float *c, int ldc);
 
-}
-
 void activate_cpu(float * d, int num, activation_type act_type);
 void activate_cpu(float * din, float * dout, int num, activation_type act_type);
 void softmax_cpu(float *input, int n, int batch, int batch_offset, int groups, int group_offset, int stride, float temp, float *output);
+
+}
 
 }
 

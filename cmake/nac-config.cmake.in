@@ -1,39 +1,51 @@
 # - Find nac package installation
 #
 # It defines the following variables
+#
 #  nac_FOUND        - has nac installed
-#  nac_INCLUDE_DIRS - include directories for nac
-#  nac_LIBRARIES    - libraries to link against
-#  nac_LIBRARIES_STATIC - static lib, only used on UNIX platform
+#  nac_INCLUDE_DIR  - include directories for nac
+#  nac_INCLUDE_DIRS - empty
+#  nac_LIBRARY      - nac shared lib  
+#  nac_LIBRARIES    - empty
+#  nac_LIBRARY_STATIC   - nac static lib
+#  nac_LIBRARIES_STATIC - empty
+#
+# And Exported target  (build config is not leave empty)
+#  nac::nac         shared lib (noconfig)
+#  nac::nac-static  static lib (noconfig)
+#
+# e.g
+#  find_package(nac)
+#  add_executable(xxx xxx.cpp)
+#  target_link_libraries(xxx PRIVATE nac::nac-static) # link static
+#
+#  target_link_libraries(xxx PRIVATE nac::nac)  # link dynamic
+#
+# set following env var to nac install path for searching this package.
+#  nac_DIR
+#  PATH
+#  CMAKE_PREFIX_PATH
+#
 
-get_filename_component(_nac_rootdir ${CMAKE_CURRENT_LIST_DIR}/../../../ ABSOLUTE)
+@PACKAGE_INIT@
 
-find_path(_nac_include_dir nac.h HINTS ${_nac_rootdir}/include)
-
-find_library(_nac_library nac HINTS ${_nac_rootdir}/lib )
-if(UNIX)
-find_library(_nac_library_static libnac-static.a HINTS ${_nac_rootdir}/lib)
-endif()
+# nac.h header
+set(nac_INCLUDE_DIR ${PACKAGE_PREFIX_DIR}/@_install_header_dir@)
+find_library(nac_LIBRARY nac HINTS ${PACKAGE_PREFIX_DIR}/@_install_lib_dir@)
+find_library(nac_LIBRARY_STATIC libnac-static.a  HINTS ${PACKAGE_PREFIX_DIR}/@_install_lib_dir@)
 
 # handle the QUIETLY and REQUIRED arguments
 include(FindPackageHandleStandardArgs)
-if(UNIX)
 find_package_handle_standard_args(nac DEFAULT_MSG
-                    _nac_library _nac_include_dir _nac_library_static)
-else()
-find_package_handle_standard_args(nac DEFAULT_MSG
-                    _nac_library _nac_include_dir)
-endif()
+                    nac_INCLUDE_DIR nac_LIBRARY nac_LIBRARY_STATIC)
 
+#-----------------------------------------------------------------------------
+# Don't include targets if this file is being picked up by another
+# project which has already built this as a subproject
+#-----------------------------------------------------------------------------
+if(NOT TARGET nac::nac)
+    include("${CMAKE_CURRENT_LIST_DIR}/@_export_targets_name@.cmake")
+endif()
 
 # only usefull in cmake-gui
-mark_as_advanced(_nac_include_dir _nac_library)
-if(UNIX)
-mark_as_advanced(_nac_library_static)
-endif()
-
-set(nac_INCLUDE_DIRS ${_nac_include_dir})
-set(nac_LIBRARIES ${_nac_library})
-if(UNIX)
-set(nac_LIBRARIES_STATIC ${_nac_library_static})
-endif()
+mark_as_advanced(nac_INCLUDE_DIR nac_LIBRARY nac_LIBRARY_STATIC)

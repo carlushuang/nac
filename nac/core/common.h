@@ -83,6 +83,8 @@ const char * act_type_to_str(activation_type act);
     while(0)
 #endif
 
+#define NAC_ABORT()  std::terminate()
+
 #define NAC_WARNING(...) \
     do{\
         std::cerr<<"[nac] warning in "<<__FILE__<<", line:"<<__LINE__ \
@@ -95,10 +97,15 @@ const char * act_type_to_str(activation_type act);
             <<"\n  \""<<nac::make_string(__VA_ARGS__)<<"\""<<  std::endl; \
     }while(0)
 
+#define NAC_INFO(...) \
+    do{\
+        std::cout<<"[nac] "<<nac::make_string(__VA_ARGS__)<<  std::endl; \
+    }while(0)
 
 #define NAC_CONCAT__(a,b)   a ## b
 #define NAC_CONCAT(a,b)     NAC_CONCAT__(a,b)
 
+#define NAC_ST()  std::cout<<" -- "<<__FILE__<<": "<<__LINE__<<", "<<__func__<<std::endl;
 
 #define NAC_RW_ATTR(type, name) \
     private: \
