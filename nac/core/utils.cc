@@ -2,6 +2,7 @@
 
 #include <math.h>
 #include <float.h>
+#include <fstream>
 
 namespace nac{
 namespace utils{
@@ -208,6 +209,24 @@ void softmax_cpu(float *input, int n, int batch, int batch_offset, int groups, i
         }
     }
 }
+
+void bin_to_file(const char * file_name, const void * ptr, int bytes){
+    if(!file_name || !ptr || bytes==0)
+        return;
+    std::ofstream out_file;
+    out_file.open(file_name, std::ofstream::binary);
+    if(!out_file){
+        NAC_WARNING("can not open ", file_name, " to write bin");
+        return ;
+    }
+    out_file.write((const char *)ptr, bytes);
+    if(!out_file){
+        NAC_WARNING("fail to write to file:", file_name);
+    }
+    out_file.close();
+    return;
+}
+
 
 }
 }

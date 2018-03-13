@@ -12,7 +12,7 @@ namespace nac{
 class hparam_map;
 class hyperparameter{
 public:
-    hyperparameter(){}
+    hyperparameter():batch_(1){}
     ~hyperparameter(){}
     virtual void calculate_outsize(int * out_w, int * out_h, int * out_c, int * out_n) final{
         NAC_ASSERT(op_node() && op_node()->input(), "op_node must be attached, and must have at least one input");
@@ -42,6 +42,12 @@ public:
             return nullptr;
         }
         return param_map.at(param_name).c_str();
+    }
+    const char * find_param(const char * param_name, const char * default_value) const{
+        const char * val = find_param(param_name);
+        if(!val)
+            return default_value;
+        return val;
     }
 private:
     std::unordered_map<std::string, std::string>   param_map;
@@ -81,19 +87,23 @@ inline float hparam_to_float(const char * value){
 #include "hyperparameter/maxpool_hparam.h"
 #undef   _NAC_INCLUDE_HYPERPARAMETER_DETAIL
 
-inline hyperparameter * hyperparameter_factory(const char * bare_op_name){
+inline hyperparameter * hyperparameter_factory(const char * bare_op_name, hparam_map * pmap=nullptr){
     NAC_ASSERT(bare_op_name);
     std::string s(bare_op_name);
+    hyperparameter * hp = nullptr;
     if(s == "conv" )
-        return new conv_hparam;
+        hp = new conv_hparam;
     if(s == "activation")
-        return new activation_hparam;
+        hp =  new activation_hparam;
     if(s == "softmax")
-        return new softmax_hparam;
+        hp =  new softmax_hparam;
     if(s == "maxpool")
-        return new maxpool_hparam;
-    
-    return nullptr;
+        hp =  new maxpool_hparam;
+
+    if(hp && pmap)
+        hp->map(pmap);
+
+    return hp;
 }
 
 

@@ -13,6 +13,8 @@ class context;
 class tensor;
 class hyperparameter;
 class operator_base;
+class data_mm;
+class graph;
 
 class node : public observable{
 public:
@@ -46,9 +48,12 @@ public:
     tensor * output(int idx = 0) const ;
     std::vector<tensor*> outputs() const ;
 
+    void prepare();
+
 protected:
     context             * ctx_;
     operator_base       * op_;
+    //graph               * gr_;
     std::unique_ptr<hyperparameter> hparam_;
 
     std::vector<tensor*> inputs_;       // not resposible for input memory
@@ -56,8 +61,15 @@ protected:
     std::vector<std::unique_ptr<tensor>> outputs_;
     std::vector<std::unique_ptr<tensor>> weights_;
 
+    data_mm * cached_dm;      // cache for all the tensor data_mm, currently should be the same
+    void valid_dm(tensor * _t);
+
+    void              * workspace_ptr;
+    int                 workspace_bytes;
+
     friend class operator_base;
 
+NAC_RW_ATTR(graph*, gr)
 DISABLE_COPY_AND_ASSIGN(node)
 };
 

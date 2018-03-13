@@ -9,6 +9,18 @@ namespace nac{
 
 using namespace utils;
 
+static void add_bias(float *output, float *biases, int batch, int n, int size)
+{
+    int i,j,b;
+    for(b = 0; b < batch; ++b){
+        for(i = 0; i < n; ++i){
+            for(j = 0; j < size; ++j){
+                output[(b*n + i)*size + j] += biases[i];
+            }
+        }
+    }
+}
+
 class op_c_fp32_conv : public operator_base{
 public:
     op_c_fp32_conv(const char * op_name) :  operator_base(op_name) {}
@@ -19,14 +31,15 @@ public:
         const conv_hparam * param = static_cast<const conv_hparam*>(hparam());
         const tensor * x = input(0);
         const tensor * filter = weight(0);
+        const tensor * bias = weight(1);
         tensor * out = output(0);
 
         NAC_ASSERT( (x->n() == param->batch()) && (out->n() == param->batch()), 
             "x/out/op batch size not the same, ", 
             x->n(),"/", out->n(), "/",param->batch(), " each");
-        NAC_ASSERT( param->filters() == filter->n(),
-            "param filters not same as filter tensor", 
-            param->filters(), "/", filter->n()," each" );
+        //NAC_ASSERT( param->filters() == filter->n(),
+        //    "param filters not same as filter tensor ", 
+        //    param->filters(), "/", filter->n()," each" );
 
         float * col_ptr = (float*)request_workspace(sizeof(float) *
             im2col_cpu_outsize(x->c(), x->h(), x->w(), param->kernel(), param->stride(), param->padding()));
@@ -45,9 +58,15 @@ public:
             gemm_cpu(0,0,m,n,k,1,a,k,b,n,c,n);
         }
 
+        //utils::bin_to_file("dump_layer-2", out->data(), out->size()*sizeof(float));
+
+        add_bias((float*)out->data(), (float*)bias->data(), param->batch(), param->filters(), out->w()*out->h());
+
+        //utils::bin_to_file("dump_layer-2-b", out->data(), out->size()*sizeof(float));
+
         if(param->act_type() != activation_type::LINEAR)
             utils::activate_cpu((float*)out->data(), out->size(), param->act_type());
-        
+
         return 0;
     }
 };

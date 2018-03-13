@@ -7,7 +7,7 @@
 namespace nac{
 
 
-node::node(context * _ctx):ctx_(_ctx),op_(nullptr),hparam_(nullptr)
+node::node(context * _ctx):ctx_(_ctx),op_(nullptr),hparam_(nullptr),cached_dm(nullptr)
 {}
 
 node::~node(){
@@ -29,19 +29,23 @@ void node::detach_op(){
 
 void node::feed_hparam(hyperparameter * _hparam){
     hparam_.reset(_hparam);
+    _hparam->op_node() = this;
 }
 
 // input, hold only the pointer
 void node::set_input(tensor * x){
+    valid_dm(x);
     inputs_.push_back(x);
 }
 void node::set_inputs(tensor ** x, int num){
     for(int i=0;i<num;i++){
+        valid_dm(x[i]);
         inputs_.push_back(x[i]);
     }
 }
 void node::set_inputs(std::vector<tensor*> &x_vec){
     for(auto x : x_vec){
+        valid_dm(x);
         inputs_.push_back(x);
     }
 }
@@ -53,17 +57,37 @@ const tensor * node::input(int idx) const {
     return inputs_.at(idx);
 }
 
+void node::valid_dm(tensor * _t){
+    if(!cached_dm)
+        cached_dm = _t->dm();
+    else{
+        NAC_ASSERT(cached_dm == _t->dm(), "dm must be the same");
+    }
+}
+
+void node::prepare(){
+    // TODO: multi prepare
+    NAC_ASSERT(cached_dm!=nullptr, "no data_mm found, prepare fail. maybe you need feed input/weight first?");
+    int out_w, out_h, out_c, out_n;
+    hparam_->calculate_outsize(&out_w, &out_h, &out_c, &out_n);
+    outputs_.emplace_back(new tensor(out_w, out_h, out_c, out_n, cached_dm));
+
+}
+
 // weight, we manage the memory for you
 void node::feed_weight(tensor * w){
+    valid_dm(w);
     weights_.emplace_back(w);
 }
 void node::feed_weights(tensor ** w, int num){
     for(int i=0;i<num;i++){
+        valid_dm(w[i]);
         weights_.emplace_back(w[i]);
     }
 }
 void node::feed_weights(std::vector<tensor*> &w_vec){
     for(auto w : w_vec){
+        valid_dm(w);
         weights_.emplace_back(w);
     }
 }

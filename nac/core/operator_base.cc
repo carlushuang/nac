@@ -4,6 +4,7 @@
 #include "context.h"
 #include "hyperparameter.h"
 #include "compute_device.h"
+#include "graph.h"
 
 namespace nac{
 
@@ -14,7 +15,6 @@ operator_base::operator_base() : operator_base("N/A") {}
 operator_base::~operator_base(){
 
 }
-
 
 const tensor * operator_base::input(int idx) const {
     NAC_ASSERT(idx<node_->inputs_.size(), "request idx:", idx, " is bigger than input size:", node_->inputs_.size());
@@ -47,8 +47,11 @@ unsigned int operator_base::put() {
 
 void *  operator_base::request_workspace(int bytes)  {
     // make sure dev_ has been assigned
-    NAC_ASSERT(dev_, "device has not been assigned to this op");
-    return dev_->request_workspace(bytes);
+    if(!node_ || !node_->gr()){
+        NAC_ERROR("can not find attached graph, no woekspace avaliable");
+        return nullptr;
+    }
+    return node_->gr()->request_workspace_with_dm(bytes, node_->cached_dm);
 }
 
 

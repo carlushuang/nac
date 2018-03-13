@@ -14,7 +14,7 @@ static inline int fp32_memcpy(void * src, int src_offset, void * dest, int dest_
 NAC_OP_REGISTER_DM(c, NAC_DATA_FP32,
     // allocator
     [](int nmemb) -> void * {
-        return (void *)new float [nmemb];
+        return (void *)new float [nmemb](); // value-init to all zero
     },
     // deleter
     [](void * ptr) -> void {

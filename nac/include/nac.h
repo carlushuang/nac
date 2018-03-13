@@ -11,9 +11,9 @@
 
 /* Error */
 #define NAC_SUCCESS                          0
-#define NAC_DEVICE_NOT_FOUND                -1
-#define NAC_CONTEXT_CREATE_FAIL             -2
-#define NAC_TENSOR_COPY_FAIL                -3
+#define NAC_DEVICE_NOT_FOUND                 -1
+#define NAC_CONTEXT_CREATE_FAIL              -2
+#define NAC_TENSOR_COPY_FAIL                 -3
 #define NAC_DUPLICATED_PARAM_NAME            -4
 
 #define NAC_INVALID_ARG                      -100
@@ -30,7 +30,6 @@ extern "C" {
 
 #ifndef NAC_EXPORT_API_HIDDEN
 
-//namespace nac{
 
 typedef void *        nac_context;
 typedef void *        nac_operator;
@@ -60,47 +59,46 @@ enum tensor_copy_direct {
     TENSOR_COPY_D2D
 };
 
-NAC_EXPORT nac_status nac_get_devices(nac_device ** devices, int * num_devices);
-NAC_EXPORT nac_status nac_get_device_info(nac_device dev, struct nac_device_info * info);
-NAC_EXPORT nac_status nac_put_device(nac_device dev);
+NAC_EXPORT nac_status   nac_device_get(nac_device ** devices, int * num_devices);
+NAC_EXPORT nac_status   nac_device_get_info(nac_device dev, struct nac_device_info * info);
+NAC_EXPORT nac_status   nac_device_put(nac_device dev);
 
-NAC_EXPORT nac_op_entry nac_get_op_entry(nac_device dev, const char * entry_name);
+NAC_EXPORT nac_op_entry nac_op_entry_get(nac_device dev, const char * entry_name);
 //NAC_EXPORT nac_status nac_get_op_entries(nac_device dev, nac_op_entry * entries, int * num_entries);
-NAC_EXPORT nac_status nac_put_op_entry(nac_op_entry op_entry);
+NAC_EXPORT nac_status   nac_op_entry_put(nac_op_entry op_entry);
 
-NAC_EXPORT nac_context nac_create_context(nac_device * devices, int num_device);
-NAC_EXPORT nac_status nac_release_context(nac_context  ctx);
+NAC_EXPORT nac_context  nac_context_create(nac_device * devices, int num_device);
+NAC_EXPORT nac_status   nac_context_release(nac_context  ctx);
 
 
-NAC_EXPORT nac_hparam nac_create_hparam(const char * op_name);
-NAC_EXPORT nac_status nac_set_hparam(nac_hparam hparam, const char * param_name, const char * value);
-NAC_EXPORT nac_status nac_release_hparam(nac_hparam hparam);
+NAC_EXPORT nac_hparam   nac_hparam_create(const char * op_name);
+NAC_EXPORT nac_status   nac_hparam_set(nac_hparam hparam, const char * param_name, const char * value);
+NAC_EXPORT nac_status   nac_hparam_release(nac_hparam hparam);
 
-NAC_EXPORT nac_node nac_create_node(nac_context ctx, nac_op_entry op_entry, const char * op_name);
-//NAC_EXPORT nac_status nac_set_node_input(nac_node nd, nac_tensor * inputs, int num_inputs);
-NAC_EXPORT nac_status nac_feed_node_weight(nac_node nd, nac_tensor * weights, int num_weights);
-NAC_EXPORT nac_status nac_set_node_hparam(nac_node nd, nac_hparam hparam);
-NAC_EXPORT nac_status nac_release_node(nac_node nd);
+// TODO: node dtor managed by graph, no need to call release
+NAC_EXPORT nac_node     nac_node_create(nac_context ctx, nac_op_entry op_entry, const char * op_name);
+NAC_EXPORT nac_status   nac_node_feed_weights(nac_node nd, nac_tensor * weights, int num_weights);
+NAC_EXPORT nac_status   nac_node_set_hparam(nac_node nd, nac_hparam hparam);
+NAC_EXPORT nac_status   nac_node_release(nac_node nd);
 
-NAC_EXPORT nac_graph nac_create_graph(nac_context ctx);
-NAC_EXPORT nac_status nac_graph_attach_node(nac_graph gr, nac_node * nodes, int num);
-NAC_EXPORT nac_status nac_graph_feed_input(nac_graph gr, nac_tensor * inputs, int num_inputs);
-NAC_EXPORT nac_status nac_graph_init(nac_graph gr);
-NAC_EXPORT nac_status nac_graph_finish(nac_graph gr);
-NAC_EXPORT nac_status nac_graph_start_inference(nac_graph gr, int loop, int need_wait);
-NAC_EXPORT nac_status nac_graph_wait(nac_graph gr);
-NAC_EXPORT nac_status nac_graph_get_result(nac_graph gr, nac_tensor * out);
-NAC_EXPORT nac_status nac_release_graph(nac_graph gr);
+NAC_EXPORT nac_graph    nac_graph_create(nac_context ctx);
+NAC_EXPORT nac_status   nac_graph_attach_node(nac_graph gr, nac_node * nodes, int num);
+NAC_EXPORT nac_status   nac_graph_feed_inputs(nac_graph gr, nac_tensor * inputs, int num_inputs);
+NAC_EXPORT nac_status   nac_graph_prepare(nac_graph gr);
+NAC_EXPORT nac_status   nac_graph_finish(nac_graph gr);
+NAC_EXPORT nac_status   nac_graph_start_inference(nac_graph gr, int loop, int need_wait);
+NAC_EXPORT nac_status   nac_graph_wait(nac_graph gr);
+NAC_EXPORT nac_status   nac_graph_get_result(nac_graph gr, nac_tensor * out);
+NAC_EXPORT nac_status   nac_graph_release(nac_graph gr);
 
-NAC_EXPORT nac_tensor nac_create_tensor(nac_op_entry op_entry, int w, int h, int c, int n);
-NAC_EXPORT nac_status nac_release_tensor(nac_tensor t);
-NAC_EXPORT nac_status nac_get_tensor_info(nac_tensor t, nac_tensor_info * info);
-NAC_EXPORT nac_status nac_set_tensor_data_raw(nac_tensor t, void * data);
-NAC_EXPORT void * nac_get_tensor_data_raw(nac_tensor t);
-NAC_EXPORT nac_status nac_copy_tensor_data(void * src, int src_offset, void * dest, int dest_offset, 
+NAC_EXPORT nac_tensor   nac_tensor_create(nac_op_entry op_entry, int w, int h, int c, int n);
+NAC_EXPORT nac_status   nac_tensor_release(nac_tensor t);
+NAC_EXPORT nac_status   nac_tensor_get_info(nac_tensor t, nac_tensor_info * info);
+NAC_EXPORT nac_status   nac_tensor_set_data_raw(nac_tensor t, void * data);
+NAC_EXPORT void *       nac_tensor_get_data_raw(nac_tensor t);
+NAC_EXPORT nac_status   nac_tensor_copy_data(void * src, int src_offset, void * dest, int dest_offset, 
                                             int nmemb, enum tensor_copy_direct direction);
 
-//}
 
 #endif    // #ifndef NAC_EXPORT_API_HIDDEN
 

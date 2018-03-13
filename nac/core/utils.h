@@ -63,6 +63,9 @@ void activate_cpu(float * d, int num, activation_type act_type);
 void activate_cpu(float * din, float * dout, int num, activation_type act_type);
 void softmax_cpu(float *input, int n, int batch, int batch_offset, int groups, int group_offset, int stride, float temp, float *output);
 
+void bin_to_file(const char * file_name, const void * ptr, int bytes);
+
+
 }
 
 }

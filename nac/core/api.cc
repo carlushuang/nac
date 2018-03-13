@@ -29,7 +29,7 @@ static bool is_device_available(compute_device * dev){
     return in_list;
 }
 
-NAC_EXPORT nac_context nac_create_context(nac_device *  devices, int num_device){
+NAC_EXPORT nac_context nac_context_create(nac_device *  devices, int num_device){
     if(!devices || num_device==0 )
         return nullptr;
     compute_device ** ds = (compute_device**)devices;
@@ -41,7 +41,7 @@ NAC_EXPORT nac_context nac_create_context(nac_device *  devices, int num_device)
     return ctx;
 }
 
-NAC_EXPORT nac_status nac_release_context(nac_context ctx){
+NAC_EXPORT nac_status nac_context_release(nac_context ctx){
     if(!ctx)
         return NAC_INVALID_ARG;
     delete (context*)ctx;
@@ -49,7 +49,7 @@ NAC_EXPORT nac_status nac_release_context(nac_context ctx){
 }
 
 /* device related api */
-NAC_EXPORT nac_status nac_get_device_info(nac_device dev, struct nac_device_info * info){
+NAC_EXPORT nac_status nac_device_get_info(nac_device dev, struct nac_device_info * info){
     if(!dev || !info)
         return NAC_INVALID_ARG;
     compute_device * d = (compute_device *)dev;
@@ -65,7 +65,7 @@ NAC_EXPORT nac_status nac_get_device_info(nac_device dev, struct nac_device_info
     return NAC_SUCCESS;
 }
 
-NAC_EXPORT nac_status nac_get_devices(nac_device ** devices, int * num_devices){
+NAC_EXPORT nac_status nac_device_get(nac_device ** devices, int * num_devices){
     compute_device ** devs;
     int num_devs;
     if(!devices || !num_devices)
@@ -81,13 +81,13 @@ NAC_EXPORT nac_status nac_get_devices(nac_device ** devices, int * num_devices){
     return NAC_SUCCESS;
 }
 
-NAC_EXPORT nac_status nac_put_device(nac_device dev){
+NAC_EXPORT nac_status nac_device_put(nac_device dev){
     (void)dev;
     return NAC_SUCCESS;
 }
 
 /* op_entry related api */
-NAC_EXPORT nac_op_entry nac_get_op_entry(nac_device dev, const char * entry_name){
+NAC_EXPORT nac_op_entry nac_op_entry_get(nac_device dev, const char * entry_name){
     if(!dev || !entry_name)
         return nullptr;
     compute_device * d = (compute_device *)dev;
@@ -97,7 +97,7 @@ NAC_EXPORT nac_op_entry nac_get_op_entry(nac_device dev, const char * entry_name
 //NAC_EXPORT nac_status nac_get_op_entries(nac_device dev, nac_op_entry * entries, int * num_entries){
 //
 //}
-NAC_EXPORT nac_status nac_put_op_entry(nac_op_entry op_entry){
+NAC_EXPORT nac_status nac_op_entry_put(nac_op_entry op_entry){
     if(!op_entry)
         return NAC_INVALID_ARG;
     op_registry::op_entry_type * ope = (op_registry::op_entry_type *)op_entry;
@@ -106,10 +106,10 @@ NAC_EXPORT nac_status nac_put_op_entry(nac_op_entry op_entry){
 }
 
 /* hparam related api */
-NAC_EXPORT nac_hparam nac_create_hparam(const char * op_name){
+NAC_EXPORT nac_hparam nac_hparam_create(const char * op_name){
     return new hparam_map(op_name);
 }
-NAC_EXPORT nac_status nac_set_hparam(nac_hparam hparam, const char * param_name, const char * value){
+NAC_EXPORT nac_status nac_hparam_set(nac_hparam hparam, const char * param_name, const char * value){
     if(!hparam || !param_name || ! value)
         return NAC_INVALID_ARG;
 
@@ -120,7 +120,7 @@ NAC_EXPORT nac_status nac_set_hparam(nac_hparam hparam, const char * param_name,
     else
         return NAC_DUPLICATED_PARAM_NAME;
 }
-NAC_EXPORT nac_status nac_release_hparam(nac_hparam hparam){
+NAC_EXPORT nac_status nac_hparam_release(nac_hparam hparam){
     if(!hparam)
         return NAC_INVALID_ARG;
     hparam_map * hp = (hparam_map *)hparam;
@@ -129,7 +129,7 @@ NAC_EXPORT nac_status nac_release_hparam(nac_hparam hparam){
 }
 
 /* node related api */
-NAC_EXPORT nac_node nac_create_node(nac_context ctx, nac_op_entry op_entry,  const char * op_name){
+NAC_EXPORT nac_node nac_node_create(nac_context ctx, nac_op_entry op_entry,  const char * op_name){
     if(!ctx || ! op_entry || !op_name)
         return nullptr;
     if(!check_op_supported(op_name)){
@@ -169,23 +169,23 @@ NAC_EXPORT nac_node nac_create_node(nac_context ctx, nac_op_entry op_entry,  con
     return the_node;
 }
 
-NAC_EXPORT nac_status nac_feed_node_weight(nac_node nd, nac_tensor * weights, int num_weights){
+NAC_EXPORT nac_status nac_node_feed_weights(nac_node nd, nac_tensor * weights, int num_weights){
     if(!nd || !weights || num_weights==0)
         return NAC_INVALID_ARG;
     node * n = (node*)nd;
     n->feed_weights((tensor**)weights, num_weights);
     return NAC_SUCCESS;
 }
-NAC_EXPORT nac_status nac_set_node_hparam(nac_node nd, nac_hparam hparam){
+NAC_EXPORT nac_status nac_node_set_hparam(nac_node nd, nac_hparam hparam){
     if(!nd || !hparam)
         return NAC_INVALID_ARG;
     
     node * n = (node*)nd;
     hparam_map * hp = (hparam_map*)hparam;
-    n->feed_hparam(hyperparameter_factory(hp->name().c_str()));
+    n->feed_hparam(hyperparameter_factory(hp->name().c_str(), hp));
     return NAC_SUCCESS;
 }
-NAC_EXPORT nac_status nac_release_node(nac_node nd){
+NAC_EXPORT nac_status nac_node_release(nac_node nd){
     if(!nd)
         return NAC_INVALID_ARG;
 
@@ -196,7 +196,7 @@ NAC_EXPORT nac_status nac_release_node(nac_node nd){
 
 /* graph related api */
 
-NAC_EXPORT nac_graph nac_create_graph(nac_context ctx){
+NAC_EXPORT nac_graph nac_graph_create(nac_context ctx){
     if(!ctx)
         return nullptr;
     nac_graph gr = new graph((context*)ctx);
@@ -209,14 +209,18 @@ NAC_EXPORT nac_status nac_graph_attach_node(nac_graph gr, nac_node * nodes, int 
     g->attach_nodes((node**)nodes, num);
     return NAC_SUCCESS;
 }
-NAC_EXPORT nac_status nac_graph_feed_input(nac_graph gr, nac_tensor * inputs, int num_inputs){
+NAC_EXPORT nac_status nac_graph_feed_inputs(nac_graph gr, nac_tensor * inputs, int num_inputs){
     if(!gr || !inputs || num_inputs==0)
         return NAC_INVALID_ARG;
     graph * g = (graph*)gr;
     g->feed_inputs((tensor**)inputs, num_inputs);
     return NAC_SUCCESS;
 }
-NAC_EXPORT nac_status nac_graph_init(nac_graph){
+NAC_EXPORT nac_status nac_graph_prepare(nac_graph gr){
+    if(!gr)
+        return NAC_INVALID_ARG;
+    graph * g = (graph*)gr;
+    g->prepare();
     return NAC_SUCCESS;
 }
 NAC_EXPORT nac_status nac_graph_start_inference(nac_graph gr, int loop, int need_wait){
@@ -244,7 +248,7 @@ NAC_EXPORT nac_status nac_graph_get_result(nac_graph gr, nac_tensor * out){
     return NAC_SUCCESS;
 }
 
-NAC_EXPORT nac_status nac_release_graph(nac_graph gr){
+NAC_EXPORT nac_status nac_graph_release(nac_graph gr){
     if(!gr)
         return NAC_INVALID_ARG;
     delete (graph*)gr;
@@ -253,7 +257,7 @@ NAC_EXPORT nac_status nac_release_graph(nac_graph gr){
 
 /* tensor related api */
 
-NAC_EXPORT nac_tensor nac_create_tensor(nac_op_entry op_entry, int w, int h, int c, int n){
+NAC_EXPORT nac_tensor nac_tensor_create(nac_op_entry op_entry, int w, int h, int c, int n){
     if(op_entry){
         op_registry::op_entry_type * ope = (op_registry::op_entry_type *)op_entry;
         return new tensor(w,h,c,n,&ope->op_dm);
@@ -261,7 +265,7 @@ NAC_EXPORT nac_tensor nac_create_tensor(nac_op_entry op_entry, int w, int h, int
     else
         return new tensor(w,h,c,n);
 }
-NAC_EXPORT nac_status nac_release_tensor(nac_tensor t){
+NAC_EXPORT nac_status nac_tensor_release(nac_tensor t){
     if(!t)
         return NAC_INVALID_ARG;
 
@@ -269,21 +273,21 @@ NAC_EXPORT nac_status nac_release_tensor(nac_tensor t){
     return NAC_SUCCESS;
 }
 
-NAC_EXPORT nac_status nac_set_tensor_data_raw(nac_tensor t, void * data){
+NAC_EXPORT nac_status nac_tensor_set_data_raw(nac_tensor t, void * data){
     if(!t)
         return NAC_INVALID_ARG;
     tensor * ts = (tensor*)t;
     ts->feed_external(data);
     return NAC_SUCCESS;
 }
-NAC_EXPORT void * nac_get_tensor_data_raw(nac_tensor t){
+NAC_EXPORT void * nac_tensor_get_data_raw(nac_tensor t){
     if(!t)
         return nullptr;
     tensor * ts = (tensor*)t;
     return ts->data();
 }
 
-NAC_EXPORT nac_status nac_get_tensor_info(nac_tensor t, nac_tensor_info * info){
+NAC_EXPORT nac_status nac_tensor_get_info(nac_tensor t, nac_tensor_info * info){
     if(!t || !info)
         return NAC_INVALID_ARG;
     tensor * ts = (tensor*)t;
@@ -295,7 +299,7 @@ NAC_EXPORT nac_status nac_get_tensor_info(nac_tensor t, nac_tensor_info * info){
     return NAC_SUCCESS;
 }
 
-NAC_EXPORT nac_status nac_copy_tensor_data(void * src, int src_offset, void * dest, int dest_offset, 
+NAC_EXPORT nac_status nac_tensor_copy_data(void * src, int src_offset, void * dest, int dest_offset, 
                                             int nmemb, enum tensor_copy_direct direction){
     if(!src || !dest)
         return NAC_INVALID_ARG;

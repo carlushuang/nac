@@ -1,4 +1,6 @@
 #if defined(_NAC_INCLUDE_HYPERPARAMETER_DETAIL)
+#include "../common.h"
+
 
 class conv_hparam : public hyperparameter{
 public:

@@ -59,7 +59,7 @@ private:
     NAC_R_ATTR(int, h)
     NAC_R_ATTR(int, c)
     NAC_R_ATTR(int, n)
-    NAC_R_ATTR(data_mm*, dm)
+    NAC_RW_ATTR(data_mm*, dm)
 };
 
 }

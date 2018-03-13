@@ -48,7 +48,7 @@ target_include_directories(nac_obj PUBLIC ${_nac_EXPORT_INCLUDE_DIR})
 
 
 #set(_nac_OPT -Os -ffast-math)
-set(_nac_OPT -Og)
+set(_nac_OPT -g)
 set(_nac_CXX_FLAGS ${_nac_OPT} -std=c++11 -Wall -Wno-switch -Wno-reorder -Wno-sign-compare)
 
 

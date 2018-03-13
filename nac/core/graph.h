@@ -13,6 +13,8 @@ namespace nac{
 class context;
 class node;
 class tensor;
+class workspace;
+class data_mm;
 
 class graph : public observable{
 public:
@@ -50,7 +52,12 @@ public:
 
     tensor * output(int idx = 0) const;
 
+    void prepare();
+
+    void * request_workspace_with_dm(int _bytes, data_mm * _dm);
+
 private:
+    bool prepared;
 
     void inference_once();
 
@@ -60,8 +67,12 @@ private:
     std::atomic_uint    loop_cnt;
 
     std::vector<std::unique_ptr<tensor>> inputs;        // graph inputs
+    std::vector<tensor * > inputs_list;             // only raw pointer to above
     std::thread * execution_thread;
     std::atomic_bool    execution_need_exit;
+
+    // TODO: multiple
+    std::unique_ptr<workspace> ws;
 
 DISABLE_COPY_AND_ASSIGN(graph)
 };
