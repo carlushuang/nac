@@ -7,10 +7,10 @@
 class maxpool_hparam : public hyperparameter{
 public:
     virtual void map(hparam_map * pmap){
-        kernel_ = hparam_to_int(pmap->find_param("kernel"));
-        padding_ = hparam_to_int(pmap->find_param("padding"));
-        stride_ = hparam_to_int(pmap->find_param("stride"));
-        outsize_type_ = hparam_to_int(pmap->find_param("outsize_type", "0"));
+        kernel_ =   pmap->find_int("kernel", 0);
+        padding_ =  pmap->find_int("padding", 0);
+        stride_ =   pmap->find_int("stride", 0);
+        outsize_type_ = pmap->find_int("outsize_type", 0);
     }
 private:
     virtual void outsize(int * out_w, int * out_h, int * out_c, int * out_n){

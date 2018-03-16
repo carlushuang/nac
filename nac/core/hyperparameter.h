@@ -4,6 +4,7 @@
 #include "common.h"
 #include "node.h"
 #include "tensor.h"
+#include "args_map.h"
 #include <unordered_map>
 #include <string>
 
@@ -27,9 +28,10 @@ NAC_RW_ATTR(int, batch)
 NAC_RW_ATTR(node*, op_node)
 };
 
-class hparam_map{
+class hparam_map : public args_map{
 public:
     hparam_map(const char * for_op_name) : name_(for_op_name) {}
+#if 0
     inline int insert_param(const char * param_name, const char * value){
         if(param_map.count(param_name) == 0){
             param_map.insert(std::make_pair<std::string, std::string>(param_name, value));
@@ -49,8 +51,9 @@ public:
             return default_value;
         return val;
     }
+#endif
 private:
-    std::unordered_map<std::string, std::string>   param_map;
+    //std::unordered_map<std::string, std::string>   param_map;
     NAC_R_ATTR(std::string, name)
 };
 

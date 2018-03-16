@@ -74,7 +74,6 @@ NAC_EXPORT nac_status nac_device_get(nac_device ** devices, int * num_devices){
     if(num_devs == 0)
         return NAC_DEVICE_NOT_FOUND;
 
-
     *devices = (void**)devs;
     *num_devices = num_devs;
 
@@ -94,9 +93,7 @@ NAC_EXPORT nac_op_entry nac_op_entry_get(nac_device dev, const char * entry_name
 
     return d->registry()->get_op_entry(entry_name);
 }
-//NAC_EXPORT nac_status nac_get_op_entries(nac_device dev, nac_op_entry * entries, int * num_entries){
-//
-//}
+
 NAC_EXPORT nac_status nac_op_entry_put(nac_op_entry op_entry){
     if(!op_entry)
         return NAC_INVALID_ARG;
@@ -114,7 +111,7 @@ NAC_EXPORT nac_status nac_hparam_set(nac_hparam hparam, const char * param_name,
         return NAC_INVALID_ARG;
 
     hparam_map * hp = (hparam_map *)hparam;
-    int rtn = hp->insert_param(param_name, value);
+    int rtn = hp->insert(param_name, value);
     if(rtn == 0)
         return NAC_SUCCESS;
     else

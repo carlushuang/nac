@@ -3,7 +3,7 @@
 class activation_hparam : public hyperparameter{
 public:
     virtual void map(hparam_map * pmap){
-        act_type_ = hparam_to_act(pmap->find_param("activation"));
+        act_type_ = hparam_to_act(pmap->find("activation", "linear").c_str());
     }
 private:
     virtual void outsize(int * out_w, int * out_h, int * out_c, int * out_n){

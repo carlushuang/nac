@@ -10,7 +10,6 @@ nac_device      g_device;
 nac_context     g_context;
 nac_op_entry    g_op_entry;
 
-
 static std::string wrap_weight_file(const char * pure_fname){
     char * var = std::getenv("WDIR");
     if(!var)
