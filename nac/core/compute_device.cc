@@ -2,6 +2,8 @@
 #include "op_registry.h"
 #include <mutex>
 #include <memory>
+#include <vector>
+#include <string>
 
 namespace nac{
 
@@ -10,8 +12,20 @@ static std::vector<std::unique_ptr<compute_device>> g_dev_list;
 static std::vector<compute_device*> g_dev_ptr_list;   // only a pointer storage place
 static std::once_flag  g_init_flag;
 
+
+static std::vector<std::string> get_library_path(){
+#ifdef __linux__
+    std::vector<std::string> lib_path = {"/usr/lib", "/lib", "/system/lib"};
+#else
+    std::vector<std::string> tmp
+    return tmp;
+#endif
+}
+
 static inline void dynamic_load_devices(){
-    
+#ifdef __linux__
+    static const char * supported_device[] = {}
+#endif
 }
 
 static inline void init_probe_devices(){

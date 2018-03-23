@@ -12,16 +12,17 @@
 #include <utility>
 #include <algorithm>
 #include <atomic>
+#include <vector>
 
 #define NAC_EXPORT_API_HIDDEN
 #include <nac.h>
 #undef  NAC_EXPORT_API_HIDDEN
 
 #define NAC_OP_REGISTRY_DECLARE(registry_name) \
-    NAC_LOCAL op_registry * get_registry_ ## registry_name ();
+    extern "C"  op_registry * get_registry_ ## registry_name ();
 
 #define NAC_OP_REGISTRY_DEFINE(registry_name)  \
-    NAC_LOCAL op_registry * get_registry_##registry_name(){ \
+    extern "C"  op_registry * get_registry_##registry_name(){ \
         static  op_registry  _registry_##registry_name(#registry_name);   \
         return &_registry_##registry_name; \
     };

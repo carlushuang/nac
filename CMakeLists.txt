@@ -18,9 +18,19 @@ if (CMAKE_CURRENT_SOURCE_DIR STREQUAL CMAKE_SOURCE_DIR)
   set(nac_BUILD_STANDALONE ON)
 endif()
 
-# options
+# @option: BUILD_TEST, bool
+# @option: BUILD_INSTALL, string for install path
 option(BUILD_TEST "build test" ${nac_BUILD_STANDALONE})
 option(BUILD_INSTALL "build for install" ${nac_BUILD_STANDALONE})
+
+# @option: BUILD_ARMV7, bool
+# @option: BUILD_ARMV7_AS_PLUGIN, bool
+option(BUILD_ARMV7 "need build armv7-a ops, only valid when cross compile" TRUE)
+option(BUILD_ARMV7_AS_PLUGIN "weather build armv7-a ops as plugin, aka, sharelib" TRUE)
+
+macro(nac_hw_plugin_target target_name hw_name)
+    set(${target_name} nac.hw.${hw_name})
+endmacro()
 
 # default build type
 #if(NOT CMAKE_BUILD_TYPE)
@@ -33,12 +43,25 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
     set(CMAKE_INSTALL_PREFIX ${CMAKE_BINARY_DIR}/install CACHE PATH "default install path" FORCE)
 endif(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 
+
+if(BUILD_ARMV7)
+    set(_nac_ARMV7_SRC)
+endif()
+
+
 # main project
 set(_nac_SRC)
 set(_nac_LOCAL_INCLUDE_DIR)
 set(_nac_EXPORT_INCLUDE_DIR)
 set(_nac_EXPORT_HEADER)
 add_subdirectory(nac)
+if(BUILD_ARMV7 AND NOT BUILD_ARMV7_AS_PLUGIN)
+    set(_nac_SRC ${_nac_SRC} ${_nac_ARMV7_SRC})
+elseif(BUILD_ARMV7 AND BUILD_ARMV7_AS_PLUGIN)
+    #set(_nac_SRC ${_nac_SRC} ${_nac_ARMV7_SRC})
+endif()
+
+
 
 add_library(nac_obj OBJECT ${_nac_SRC})
 set_property(TARGET nac_obj PROPERTY POSITION_INDEPENDENT_CODE 1)
@@ -100,6 +123,14 @@ target_compile_options(nac-static INTERFACE ${_nac_CXX_FLAGS})
 # for use of configure_package_config_file()
 include(CMakePackageConfigHelpers)
 
+if(BUILD_ARMV7 AND BUILD_ARMV7_AS_PLUGIN)
+    nac_hw_plugin_target(nac_armv7_target armv7)
+    #message(STATUS "nac_armv7_target:${nac_armv7_target}")
+    add_library(${nac_armv7_target} SHARED ${_nac_ARMV7_SRC})
+    target_include_directories(${nac_armv7_target} PRIVATE ${_nac_LOCAL_INCLUDE_DIR})
+    target_include_directories(${nac_armv7_target} PRIVATE ${_nac_EXPORT_INCLUDE_DIR})
+endif()
+
 if(BUILD_INSTALL)
     install(TARGETS nac EXPORT ${_export_targets_name} LIBRARY DESTINATION ${_install_lib_dir})
     install(TARGETS nac-static EXPORT ${_export_targets_name} ARCHIVE DESTINATION ${_install_lib_dir})
@@ -118,17 +149,22 @@ if(BUILD_INSTALL)
 
     # export target to file
     install(EXPORT ${_export_targets_name} NAMESPACE "nac::" DESTINATION  ${_install_cfg_dir})
+
+    # plugin for compute device
+    if(BUILD_ARMV7 AND BUILD_ARMV7_AS_PLUGIN)
+        install(TARGETS ${nac_armv7_target} LIBRARY DESTINATION ${_install_lib_dir})
+    endif()
 endif()
 
 if(BUILD_TEST)
     add_subdirectory(nac/test)
 endif()
 
-#get_property(_n1 TARGET nac PROPERTY INTERFACE_COMPILE_OPTIONS)
-#get_property(_n2 TARGET nac::nac-static PROPERTY INTERFACE_COMPILE_OPTIONS)
 
 message(STATUS "nac_VERSION: ${nac_VERSION}")
 message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE}")
 message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
 message(STATUS "CMAKE_CXX_COMPILER_ID: ${CMAKE_CXX_COMPILER_ID}")
-
+if(CMAKE_CROSSCOMPILING)
+    message(STATUS "CROSS_COMPILE_PREFIX=${CROSS_COMPILE_PREFIX}")
+endif()
