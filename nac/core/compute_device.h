@@ -25,6 +25,7 @@ private:
 
 NAC_RW_ATTR(op_registry*, registry)
 NAC_R_ATTR(std::string, name)
+NAC_RW_ATTR(void *, plugin_handler)     // maybe this device is inited from plugin, aka shrlib
 };
 
 

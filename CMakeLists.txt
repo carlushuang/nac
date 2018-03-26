@@ -106,6 +106,10 @@ else()
     endif()
 endif()
 
+# dlopen/getProcAddress
+target_link_libraries(nac ${CMAKE_DL_LIBS})
+target_link_libraries(nac-static ${CMAKE_DL_LIBS})
+
 # relative path afer install prefix
 set(_install_header_dir include)
 set(_install_lib_dir lib)

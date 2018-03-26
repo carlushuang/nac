@@ -15,6 +15,8 @@ public:
 
     virtual int forward()
     {
+        // https://github.com/Maratyszcza/NNPACK/issues/8
+        // winograd F(6x6,3x3) parameters
         return op_c_fp32_conv::forward();
     }
 };

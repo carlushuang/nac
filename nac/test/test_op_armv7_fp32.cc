@@ -307,11 +307,11 @@ void prepare(){
         if(ret != NAC_SUCCESS)
             std::terminate();
         std::string _dn(di.dev_name);
-        if(_dn == "c")
+        if(_dn == "armv7")
             break;
     }
     if(i == num_devs){
-        std::cout<< "can not find device \"c\" "<<std::endl;
+        std::cout<< "can not find device \"armv7\" "<<std::endl;
         std::terminate();
     }
     g_device = devs[i];

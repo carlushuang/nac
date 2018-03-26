@@ -18,3 +18,11 @@ set(test_op_c_fp32_src
 add_executable(nac_test_op_c_fp32 ${test_op_c_fp32_src})
 target_compile_options(nac_test_op_c_fp32 PRIVATE ${test_cxxflags})
 target_link_libraries(nac_test_op_c_fp32 PRIVATE nac::nac)
+
+
+# test_op_armv7_fp32
+if(CMAKE_CROSSCOMPILING AND BUILD_ARMV7 AND (ARM_ABI STREQUAL "armeabi-v7a"))
+    set(test_op_armv7_fp32_src test_op_armv7_fp32.cc)
+    add_executable(test_op_armv7_fp32 ${test_op_armv7_fp32_src})
+    target_link_libraries(test_op_armv7_fp32 PRIVATE nac::nac)
+endif()

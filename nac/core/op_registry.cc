@@ -198,8 +198,11 @@ op_registry::op_entry_type & op_registry::try_locate_entry(int data_type){
     if(!found_entry){
         // store a ptr ** of op names for request use
         std::string _s = data_type_to_str(data_type);
-        char * en = new char [_s.size()+1];
-        std::copy(_s.begin(), _s.end(), en);
+        int length = _s.size();
+        char * en = new char [length+1];
+        //std::copy(_s.begin(), _s.end(), en);
+        _s.copy(en,length);
+        en[length] = '\0';
         op_entry_names_.push_back(en);
 
         // new empty entry
