@@ -127,7 +127,7 @@ target_compile_options(nac-static INTERFACE ${_nac_CXX_FLAGS})
 # for use of configure_package_config_file()
 include(CMakePackageConfigHelpers)
 
-if(BUILD_ARMV7 AND BUILD_ARMV7_AS_PLUGIN)
+if(VALID_FOR_BUILD_ARMV7 AND BUILD_ARMV7 AND BUILD_ARMV7_AS_PLUGIN)
     nac_hw_plugin_target(nac_armv7_target armv7)
     #message(STATUS "nac_armv7_target:${nac_armv7_target}")
     add_library(${nac_armv7_target} SHARED ${_nac_ARMV7_SRC})
@@ -155,7 +155,7 @@ if(BUILD_INSTALL)
     install(EXPORT ${_export_targets_name} NAMESPACE "nac::" DESTINATION  ${_install_cfg_dir})
 
     # plugin for compute device
-    if(BUILD_ARMV7 AND BUILD_ARMV7_AS_PLUGIN)
+    if(VALID_FOR_BUILD_ARMV7 AND BUILD_ARMV7 AND BUILD_ARMV7_AS_PLUGIN)
         install(TARGETS ${nac_armv7_target} LIBRARY DESTINATION ${_install_lib_dir})
     endif()
 endif()

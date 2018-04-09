@@ -26,3 +26,9 @@ if(CMAKE_CROSSCOMPILING AND BUILD_ARMV7 AND (ARM_ABI STREQUAL "armeabi-v7a"))
     add_executable(test_op_armv7_fp32 ${test_op_armv7_fp32_src})
     target_link_libraries(test_op_armv7_fp32 PRIVATE nac::nac)
 endif()
+
+# test brew
+set(test_brew_src test_brew.cc)
+add_executable(test_brew ${test_brew_src})
+target_compile_options(test_brew PRIVATE ${test_cxxflags})
+target_link_libraries(test_brew PRIVATE nac::nac)

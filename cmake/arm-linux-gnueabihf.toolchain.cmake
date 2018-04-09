@@ -7,6 +7,9 @@ if( CMAKE_CROSSCOMPILING )
     return()
 endif()
 
+# check following flag for support compiling this target
+set(VALID_FOR_BUILD_ARMV7 false CACHE BOOL "" FORCE)
+
 #set(GCC_COMPILER_VERSION "" CACHE STRING "GCC Compiler version")
 set(CROSS_COMPILE_PREFIX "arm-linux-gnueabihf" CACHE STRING "GNU compiler triple")
 
@@ -64,11 +67,10 @@ endif()
 if(ARM_ABI STREQUAL "armeabi-v7a")
     set(CMAKE_SYSTEM_PROCESSOR armv7-a)
     set(_CXX_FLAGS "-march=armv7-a -mfpu=neon")
+    set(VALID_FOR_BUILD_ARMV7 true CACHE BOOL "" FORCE)
 else()
     message(FATAL_ERROR "UNKNOE ARM_ABI:${ARM_ABI}")
 endif()
 
-#message(STATUS "ARM_ABI=${ARM_ABI}")
 
 set(CMAKE_CXX_FLAGS           "${CMAKE_CXX_FLAGS} ${_CXX_FLAGS}")
-

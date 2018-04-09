@@ -1,6 +1,12 @@
 #include <nac.h>
 // exported header first, in case we hidden api in the following
 
+
+// TODO: backend select
+#ifndef NAC_BREW_BACKEND_DARKNET
+#define NAC_BREW_BACKEND_DARKNET    1
+#endif
+
 #include "context.h"
 #include "compute_device.h"
 #include "hyperparameter.h"
@@ -9,6 +15,8 @@
 #include "graph.h"
 #include "op_registry.h"
 #include "tensor.h"
+#include "brew.h"
+#include "args_map.h"
 
 
 /* export api */
@@ -30,7 +38,7 @@ static bool is_device_available(compute_device * dev){
 }
 
 NAC_EXPORT nac_context nac_context_create(nac_device *  devices, int num_device){
-    if(!devices || num_device==0 )
+    if(unlikely(!devices || num_device==0 ))
         return nullptr;
     compute_device ** ds = (compute_device**)devices;
     for(int i=0;i<num_device;i++)
@@ -42,7 +50,7 @@ NAC_EXPORT nac_context nac_context_create(nac_device *  devices, int num_device)
 }
 
 NAC_EXPORT nac_status nac_context_release(nac_context ctx){
-    if(!ctx)
+    if(unlikely(!ctx))
         return NAC_INVALID_ARG;
     delete (context*)ctx;
     return NAC_SUCCESS;
@@ -50,7 +58,7 @@ NAC_EXPORT nac_status nac_context_release(nac_context ctx){
 
 /* device related api */
 NAC_EXPORT nac_status nac_device_get_info(nac_device dev, struct nac_device_info * info){
-    if(!dev || !info)
+    if(unlikely(!dev || !info))
         return NAC_INVALID_ARG;
     compute_device * d = (compute_device *)dev;
     if(!is_device_available(d))
@@ -68,7 +76,7 @@ NAC_EXPORT nac_status nac_device_get_info(nac_device dev, struct nac_device_info
 NAC_EXPORT nac_status nac_device_get(nac_device ** devices, int * num_devices){
     compute_device ** devs;
     int num_devs;
-    if(!devices || !num_devices)
+    if(unlikely(!devices || !num_devices))
         return NAC_INVALID_ARG;
     probe_compute_devices(&devs, &num_devs);
     if(num_devs == 0)
@@ -87,7 +95,7 @@ NAC_EXPORT nac_status nac_device_put(nac_device dev){
 
 /* op_entry related api */
 NAC_EXPORT nac_op_entry nac_op_entry_get(nac_device dev, const char * entry_name){
-    if(!dev || !entry_name)
+    if(unlikely(!dev || !entry_name))
         return nullptr;
     compute_device * d = (compute_device *)dev;
 
@@ -95,7 +103,7 @@ NAC_EXPORT nac_op_entry nac_op_entry_get(nac_device dev, const char * entry_name
 }
 
 NAC_EXPORT nac_status nac_op_entry_put(nac_op_entry op_entry){
-    if(!op_entry)
+    if(unlikely(!op_entry))
         return NAC_INVALID_ARG;
     op_registry::op_entry_type * ope = (op_registry::op_entry_type *)op_entry;
     ope->registry->put_op_entry(ope);
@@ -107,7 +115,7 @@ NAC_EXPORT nac_hparam nac_hparam_create(const char * op_name){
     return new hparam_map(op_name);
 }
 NAC_EXPORT nac_status nac_hparam_set(nac_hparam hparam, const char * param_name, const char * value){
-    if(!hparam || !param_name || ! value)
+    if(unlikely(!hparam || !param_name || ! value))
         return NAC_INVALID_ARG;
 
     hparam_map * hp = (hparam_map *)hparam;
@@ -118,16 +126,41 @@ NAC_EXPORT nac_status nac_hparam_set(nac_hparam hparam, const char * param_name,
         return NAC_DUPLICATED_PARAM_NAME;
 }
 NAC_EXPORT nac_status nac_hparam_release(nac_hparam hparam){
-    if(!hparam)
+    if(unlikely(!hparam))
         return NAC_INVALID_ARG;
     hparam_map * hp = (hparam_map *)hparam;
     delete hp;
     return NAC_SUCCESS;
 }
 
+/* brew related api */
+
+NAC_EXPORT nac_brew nac_brew_create(nac_context ctx, const char * args){
+    if(unlikely(!ctx||!args))
+        return nullptr;
+#if NAC_BREW_BACKEND_DARKNET
+    args_map * _args = new args_map();
+    if(!_args->parse(args)){
+        NAC_ERROR("fail to parse args:", args);
+        delete _args;
+        return nullptr;
+    }
+    brew * br = new brew_darknet(_args);
+    return (void*)br;
+#endif
+    return nullptr;
+}
+NAC_EXPORT nac_status nac_brew_release(nac_brew br){
+    if(unlikely(!br))
+        return NAC_INVALID_ARG;
+    brew * b = (brew*)br;
+    delete b;
+    return NAC_SUCCESS;
+}
+
 /* node related api */
 NAC_EXPORT nac_node nac_node_create(nac_context ctx, nac_op_entry op_entry,  const char * op_name){
-    if(!ctx || ! op_entry || !op_name)
+    if(unlikely(!ctx || ! op_entry || !op_name))
         return nullptr;
     if(!check_op_supported(op_name)){
         NAC_ERROR("request op:", op_name, " is not supported");
@@ -167,14 +200,14 @@ NAC_EXPORT nac_node nac_node_create(nac_context ctx, nac_op_entry op_entry,  con
 }
 
 NAC_EXPORT nac_status nac_node_feed_weights(nac_node nd, nac_tensor * weights, int num_weights){
-    if(!nd || !weights || num_weights==0)
+    if(unlikely(!nd || !weights || num_weights==0))
         return NAC_INVALID_ARG;
     node * n = (node*)nd;
     n->feed_weights((tensor**)weights, num_weights);
     return NAC_SUCCESS;
 }
 NAC_EXPORT nac_status nac_node_set_hparam(nac_node nd, nac_hparam hparam){
-    if(!nd || !hparam)
+    if(unlikely(!nd || !hparam))
         return NAC_INVALID_ARG;
     
     node * n = (node*)nd;
@@ -183,7 +216,7 @@ NAC_EXPORT nac_status nac_node_set_hparam(nac_node nd, nac_hparam hparam){
     return NAC_SUCCESS;
 }
 NAC_EXPORT nac_status nac_node_release(nac_node nd){
-    if(!nd)
+    if(unlikely(!nd))
         return NAC_INVALID_ARG;
 
     node* n = (node*)nd;
@@ -194,34 +227,34 @@ NAC_EXPORT nac_status nac_node_release(nac_node nd){
 /* graph related api */
 
 NAC_EXPORT nac_graph nac_graph_create(nac_context ctx){
-    if(!ctx)
+    if(unlikely(!ctx))
         return nullptr;
     nac_graph gr = new graph((context*)ctx);
     return gr;
 }
 NAC_EXPORT nac_status nac_graph_attach_node(nac_graph gr, nac_node * nodes, int num){
-    if(!gr || !nodes || num==0)
+    if(unlikely(!gr || !nodes || num==0))
         return NAC_INVALID_ARG;
     graph * g = (graph*)gr;
     g->attach_nodes((node**)nodes, num);
     return NAC_SUCCESS;
 }
 NAC_EXPORT nac_status nac_graph_feed_inputs(nac_graph gr, nac_tensor * inputs, int num_inputs){
-    if(!gr || !inputs || num_inputs==0)
+    if(unlikely(!gr || !inputs || num_inputs==0))
         return NAC_INVALID_ARG;
     graph * g = (graph*)gr;
     g->feed_inputs((tensor**)inputs, num_inputs);
     return NAC_SUCCESS;
 }
 NAC_EXPORT nac_status nac_graph_prepare(nac_graph gr){
-    if(!gr)
+    if(unlikely(!gr))
         return NAC_INVALID_ARG;
     graph * g = (graph*)gr;
     g->prepare();
     return NAC_SUCCESS;
 }
 NAC_EXPORT nac_status nac_graph_start_inference(nac_graph gr, int loop, int need_wait){
-    if(!gr)
+    if(unlikely(!gr))
         return NAC_INVALID_ARG;
 
     graph * g = (graph*)gr;
@@ -229,7 +262,7 @@ NAC_EXPORT nac_status nac_graph_start_inference(nac_graph gr, int loop, int need
     return NAC_SUCCESS;
 }
 NAC_EXPORT nac_status nac_graph_wait(nac_graph gr){
-    if(!gr)
+    if(unlikely(!gr))
         return NAC_INVALID_ARG;
     graph * g = (graph*)gr;
     g->wait();
@@ -237,7 +270,7 @@ NAC_EXPORT nac_status nac_graph_wait(nac_graph gr){
 }
 NAC_EXPORT nac_status nac_graph_get_result(nac_graph gr, nac_tensor * out){
     // currently only 1 output
-    if(!gr || !out)
+    if(unlikely(!gr || !out))
         return NAC_INVALID_ARG;
     graph * g = (graph*)gr;
     //*num_outs = 1;
@@ -246,7 +279,7 @@ NAC_EXPORT nac_status nac_graph_get_result(nac_graph gr, nac_tensor * out){
 }
 
 NAC_EXPORT nac_status nac_graph_release(nac_graph gr){
-    if(!gr)
+    if(unlikely(!gr))
         return NAC_INVALID_ARG;
     delete (graph*)gr;
     return NAC_SUCCESS;
@@ -263,7 +296,7 @@ NAC_EXPORT nac_tensor nac_tensor_create(nac_op_entry op_entry, int w, int h, int
         return new tensor(w,h,c,n);
 }
 NAC_EXPORT nac_status nac_tensor_release(nac_tensor t){
-    if(!t)
+    if(unlikely(!t))
         return NAC_INVALID_ARG;
 
     delete (tensor*)t;
@@ -271,21 +304,21 @@ NAC_EXPORT nac_status nac_tensor_release(nac_tensor t){
 }
 
 NAC_EXPORT nac_status nac_tensor_set_data_raw(nac_tensor t, void * data){
-    if(!t)
+    if(unlikely(!t))
         return NAC_INVALID_ARG;
     tensor * ts = (tensor*)t;
     ts->feed_external(data);
     return NAC_SUCCESS;
 }
 NAC_EXPORT void * nac_tensor_get_data_raw(nac_tensor t){
-    if(!t)
+    if(unlikely(!t))
         return nullptr;
     tensor * ts = (tensor*)t;
     return ts->data();
 }
 
 NAC_EXPORT nac_status nac_tensor_get_info(nac_tensor t, nac_tensor_info * info){
-    if(!t || !info)
+    if(unlikely(!t || !info))
         return NAC_INVALID_ARG;
     tensor * ts = (tensor*)t;
     info->w = ts->w();
@@ -298,7 +331,7 @@ NAC_EXPORT nac_status nac_tensor_get_info(nac_tensor t, nac_tensor_info * info){
 
 NAC_EXPORT nac_status nac_tensor_copy_data(void * src, int src_offset, void * dest, int dest_offset, 
                                             int nmemb, enum tensor_copy_direct direction){
-    if(!src || !dest)
+    if(unlikely(!src || !dest))
         return NAC_INVALID_ARG;
     int rtn;
     if(direction == TENSOR_COPY_D2H){

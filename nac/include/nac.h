@@ -39,6 +39,7 @@ typedef void *        nac_tensor;
 typedef void *        nac_graph;
 typedef void *        nac_op_entry;
 typedef void *        nac_hparam;
+typedef void *        nac_brew;
 
 typedef int           nac_status;
 
@@ -74,6 +75,11 @@ NAC_EXPORT nac_status   nac_context_release(nac_context  ctx);
 NAC_EXPORT nac_hparam   nac_hparam_create(const char * op_name);
 NAC_EXPORT nac_status   nac_hparam_set(nac_hparam hparam, const char * param_name, const char * value);
 NAC_EXPORT nac_status   nac_hparam_release(nac_hparam hparam);
+
+// brew model
+/* args should be: "<key>=<value>:<key>=<value>...""  */
+NAC_EXPORT nac_brew     nac_brew_create(nac_context ctx, const char * args);
+NAC_EXPORT nac_status   nac_brew_release(nac_brew br);
 
 // TODO: node dtor managed by graph, no need to call release
 NAC_EXPORT nac_node     nac_node_create(nac_context ctx, nac_op_entry op_entry, const char * op_name);
